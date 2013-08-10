@@ -1,0 +1,150 @@
+<?xml version="1.0" ?>
+<project name="Remotr Server" default="tidy-war" basedir=".">
+	<!-- PROPERTIES -->
+	<property name="sourceDir" location="./src" />
+	<property name="buildDir" value="./build" />
+	<property name="webcontentDir" location="./WebContent" />
+	<property name="binDir" value="${buildDir}/bin" />
+	<property name="distDir" value="./dist" />
+	<property name="docDir" location="./doc" />
+	<property name="warFileName" value="remotr.war" />
+	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
+	<property name="debug" value="true" />
+	<property name="deployDir" value="/usr/local/jboss/standalone/deployments"/>
+	
+	<!-- libs -->
+	<property name="hibernate.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\required" />
+	<property name="hibernatejpa.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\jpa" />
+	<property name="spring.lib" value="C:\Users\mattm\workspace\RemotrServer\lib\spring framework" />
+	<property name="log.lib" value="C:\Users\mattm\workspace\RemotrServer\lib\log4j" />
+	<property name="quartz.lib" value="C:\java\quartz-2.2.0\lib" />
+	<property name="servlet.lib" value="C:\Program Files\eclipse\plugins\com.google.appengine.eclipse.sdkbundle_1.8.0\appengine-java-sdk-1.8.0\lib\shared" />
+	<property name="mysql.lib" value="C:\java\mysql-connector-java-5.1.25" />
+	
+	<path id="compile-classpath">
+        <fileset dir="${hibernate.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${hibernatejpa.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${spring.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${log.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${quartz.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${servlet.lib}">
+            <include name="servlet-api.jar"/>
+        </fileset>
+        <fileset dir="${mysql.lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+	
+	<fileset dir="${hibernate.lib}" casesensitive="yes">
+		<include name="**/*.jar" />
+	</fileset>
+
+	<!-- TARGETS -->
+	<target name="remove-docs">
+	    <delete dir="${docDir}" />
+	</target>
+	
+	<target name="remove-builds">
+	    <echo message="Removing all dirs" />
+		<delete dir="${buildDir}" />
+		<delete dir="${distDir}" />
+	</target>
+	
+	<target name="remove-bin" depends="remove-builds">
+	    <echo message="Removing bin dir" />
+	    <delete dir="${baseDir}/bin" />
+	    <delete dir="${binDir}" />
+	</target>
+	
+	<target name="init" depends="remove-bin">
+		<echo message="Creating new dirs" />
+		<mkdir dir="${buildDir}" />
+		<mkdir dir="${distDir}" />
+		<mkdir dir="${docDir}" />
+		<mkdir dir="${binDir}" />
+		<echo message="Completed init." />
+	</target>
+
+	<target name="build" depends="init">
+		<echo message="Copying files to build directory" />
+		<copy todir="${buildDir}/" verbose="${debug}"
+			preservelastmodified="true">
+			<fileset dir="${basedir}" excludes="${imageFiles}">
+				<exclude name="${buildDir}/" />
+				<exclude name="${distDir}/" />
+				<exclude name="build.xml" />
+				<exclude name=".project" />
+				<exclude name="**/.settings" />
+				<exclude name="**/.git" />
+			</fileset>
+		</copy>
+
+		<echo message="File copy complete" />
+	</target>
+	
+	<target name="compile" depends="build">
+	    <echo message="Building source" />
+        <javac srcdir="${sourceDir}"
+               destdir="${binDir}"
+               debug="true"
+               debuglevel="lines,vars,source"
+               source="1.6"
+               target="1.6"
+               encoding="UTF-8"
+			   includeantruntime="false">
+            <classpath refid="compile-classpath" />
+        </javac>
+    </target>
+	
+	
+	<target name="war" depends="compile">
+		<echo message="Creating WAR file" />
+		<war destfile="${distDir}/${warFileName}" webxml="${buildDir}/WebContent/WEB-INF/web.xml">
+			<lib dir="${buildDir}/WebContent/WEB-INF/lib" />
+			<lib dir="${hibernate.lib}" />
+			<lib dir="${hibernatejpa.lib}" />
+			<lib dir="${mysql.lib}" />
+			<classes dir="${binDir}" />
+		</war>	
+		<echo message="WAR file created." />
+	</target>
+	
+	<target name="doc" depends="remove-docs">
+	    <delete dir="${docDir}" />
+	    <mkdir dir="${docDir}" />
+		<javadoc sourcepath="${sourceDir}" destdir="${docDir}" />
+	</target>
+	
+	<target name="clean-all" depends="init" />	
+	
+	<target name="tidy-war" depends="war">
+	    <echo message="Tidying up..." />
+	    <delete dir="${buildDir}" />
+	    <delete dir="{$buildDir}/classes" />
+	</target>
+	
+	<target name="deploy" depends="tidy-war">
+		<echo message="Deploying to Sancho" />
+		<ftp server="sancho" userid="matt" password="aftfrek89" remotedir="/usr/local/jboss/standalone/deployments" verbose="true">
+            <fileset dir="./dist">
+                <include name="*.war"/>
+            </fileset>
+        </ftp>
+        <echo message="Done deploying to Sancho" />
+	</target>
+	
+	<target name="test-war" depends="tidy-war">
+	    <echo message="Not yet done" />
+	</target>
+	
+</project>

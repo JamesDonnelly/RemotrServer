@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+    <!-- Device Subsystem -->
+	<bean id="deviceCoordinator" class="com.matt.remotr.core.device.DeviceCoordinatorDefault" />
+	<bean id="deviceCoordinatorWs" class="com.matt.remotr.core.device.DeviceCoordinatorWsImpl" autowire="default" />
+	
+	<!-- WsTcp Subsystem -->
+	<bean id="tcpCoordinator" class="com.matt.remotr.tcpws.TcpWsCoordinatorDefault">
+		<constructor-arg name="tcpWsEnabled" value="true" />
+		<constructor-arg name="portNumber" value="3030"/>
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
+		<property name="eventForwarder" ref="eventCoordinator"/>
+		<property name="maxConnections" value="10"/>
+	</bean>
+	 
+	<!-- Event Subsystem -->
+	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault" >
+	    <property name="deviceCoordinator" ref="deviceCoordinator"/>
+	    <property name="tcpWsSender" ref="tcpCoordinator" />
+	</bean>
+	<bean id="eventCoordinatorWs" class="com.matt.remotr.core.event.EventCoordinatorWsImpl" autowire="default" />
+
+</beans>

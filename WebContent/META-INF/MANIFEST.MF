@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Dependency: com.mysql, org.hibernate.core, org.springframework, org.apache.log4j export

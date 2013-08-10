@@ -1,0 +1,142 @@
+package com.matt.remotr.core.device;
+
+import java.util.ArrayList;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlType;
+
+import com.matt.remotr.core.command.Command;
+
+@XmlType(name="DeviceList")
+class DeviceList {
+	private ArrayList<Device> devices;
+	
+	public DeviceList(){
+		devices = new ArrayList<Device>();
+	}
+	
+	public boolean addByDevice(Device device){
+		if(!contains(device)){
+			return devices.add(device);
+		}else{
+			return false;
+		}
+	}
+
+	public boolean addByTypes(String name, DeviceType type){
+		Device device = new Device();
+		device.setName(name);
+		device.setType(type);
+		device.setHasHeartbeat(false);
+		device.setLastHeatbeatTime(0L);
+		if(!devices.contains(device)){
+			return devices.add(device);
+		}else{
+			return false;
+		}
+	}
+	
+	public boolean addByTypes(String name, DeviceType type, ArrayList<Command> commands){
+		Device device = new Device();
+		device.setName(name);
+		device.setType(type);
+		device.setHasHeartbeat(false);
+		device.setLastHeatbeatTime(0L);
+		device.setCommands(commands);
+		if(!devices.contains(device)){
+			return devices.add(device);
+		}else{
+			return false;
+		}
+	}
+	
+	public Device getByTypes(String name, DeviceType type){
+		Device device = new Device();
+		device.setName(name);
+		device.setType(type);
+		
+		if(devices.contains(device)){
+			int i = devices.indexOf(device);
+			return devices.get(i);
+		}else{
+			return null;
+		}
+	}
+	
+	public boolean removeByTypes(String name, DeviceType type){
+		Device device = new Device();
+		device.setName(name);
+		device.setType(type);
+		device.setHasHeartbeat(false);
+		if(devices.contains(device)){
+			return devices.remove(device);
+		}else{
+			return false;
+		}
+	}
+	
+	public boolean removeByDevice(Device device){
+		if(devices.contains(device)){
+			return devices.remove(device);
+		}else{
+			return false;
+		}
+	}
+	
+	public void removeAll(){
+		for(Device d : devices){
+			devices.remove(d);
+		}
+	}
+	
+	@XmlElement(name="Device")
+	@XmlElementWrapper(name="Devices")
+	public ArrayList<Device> getDevices(){
+		if(!devices.isEmpty()){
+			return devices;
+		}else{
+			return null;
+		}
+	}
+	
+	public Device get(int id){
+		return devices.get(id);
+	}
+	
+	public boolean contains(Device device){
+		return devices.contains(device);
+	}
+	
+	public boolean isEmpty(){
+		return devices.isEmpty();
+	}
+	
+	public int size(){
+		return devices.size();
+	}
+	
+	/**
+	 * Tad confusing, this is position of the device in the list
+	 * @param device
+	 * @return
+	 */
+	public int getDevicePos(Device device){
+		return devices.indexOf(device);
+	}
+	
+	/**
+	 * Gets the device with the id
+	 * @param device
+	 * @return
+	 */
+	public Device get(Long id){
+		for(Device d : devices){
+			if(d.getId().equals(id)){
+				return d;
+			}
+		}
+		return null;
+	}
+	
+}
