@@ -19,7 +19,9 @@
 	<property name="log.lib" value="C:\Users\mattm\workspace\RemotrServer\lib\log4j" />
 	<property name="quartz.lib" value="C:\java\quartz-2.2.0\lib" />
 	<property name="servlet.lib" value="C:\Program Files\eclipse\plugins\com.google.appengine.eclipse.sdkbundle_1.8.0\appengine-java-sdk-1.8.0\lib\shared" />
-	<property name="mysql.lib" value="C:\java\mysql-connector-java-5.1.25" />
+	<property name="mysql.lib" value="C:\java\mysql-connector-java-5.1.25\lib" />
+	
+	<property file="${sourceDir}/version.properties" />
 	
 	<path id="compile-classpath">
         <fileset dir="${hibernate.lib}">
@@ -110,13 +112,22 @@
 	<target name="war" depends="compile">
 		<echo message="Creating WAR file" />
 		<war destfile="${distDir}/${warFileName}" webxml="${buildDir}/WebContent/WEB-INF/web.xml">
+		    <manifest>
+		    	<attribute name="Implementation-Version" value="${version}"/>
+		    </manifest>
 			<lib dir="${buildDir}/WebContent/WEB-INF/lib" />
 			<lib dir="${hibernate.lib}" />
 			<lib dir="${hibernatejpa.lib}" />
+			<lib dir="${quartz.lib}" />
+			<lib dir="${spring.lib}" />
 			<lib dir="${mysql.lib}" />
+			<zipfileset dir="${buildDir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes"/>
+			<zipfileset dir="${buildDir}/src" includes="hibernate.properties" prefix="WEB-INF/classes"/>
 			<classes dir="${binDir}" />
 		</war>	
 		<echo message="WAR file created." />
+		<echo message="Copying config to dist" />
+		<copy file="${webcontentDir}/WEB-INF/spring.xml" todir="${distDir}" overwrite="true"/>
 	</target>
 	
 	<target name="doc" depends="remove-docs">
@@ -131,16 +142,6 @@
 	    <echo message="Tidying up..." />
 	    <delete dir="${buildDir}" />
 	    <delete dir="{$buildDir}/classes" />
-	</target>
-	
-	<target name="deploy" depends="tidy-war">
-		<echo message="Deploying to Sancho" />
-		<ftp server="sancho" userid="matt" password="aftfrek89" remotedir="/usr/local/jboss/standalone/deployments" verbose="true">
-            <fileset dir="./dist">
-                <include name="*.war"/>
-            </fileset>
-        </ftp>
-        <echo message="Done deploying to Sancho" />
 	</target>
 	
 	<target name="test-war" depends="tidy-war">
