@@ -1,21 +1,11 @@
 package com.matt.remotr.core.job;
 
+import org.quartz.JobDataMap;
+
 import com.matt.remotr.core.command.Command;
 import com.matt.remotr.core.device.Device;
 
 public interface JobCoordinator {
-	
-	/**
-	 * Registers the device with the JobCoordinator - This indicates to the Coordinator that that device is capable of running jobs. 
-	 * @param device
-	 */
-	public void registerManager(Device device);
-	
-	/**
-	 * Unregister the device with the JobCoordinator - This can be used to ensure no new jobs are sent to this device
-	 * @param device
-	 */
-	public void unregisterManager(Device device);
 	
 	/**
 	 * Creates a job on the associated device for the given command. The job is created to run when received. 
@@ -38,19 +28,23 @@ public interface JobCoordinator {
 	 * @throws Exception 
 	 */
 	public void executeJob(int jobId) throws Exception;
+
 	
 	/**
-	 * Executes the given job with the jobId and adds a listener to be notified on job events
+	 * Executes the given job with the jobId and adds a device to send job events too for this job
 	 * @param jobId
-	 * @param jobEventListener
+	 * @param device
+	 * @throws Exception 
 	 */
-	//public void executeJob(int jobId, JobEventListener jobEventListener);
+	public void executeJob(int jobId, Device device) throws Exception;
 	
 	/**
-	 * Returns the status of the given jobId
+	 * 
 	 * @param jobId
+	 * @return
+	 * @throws Exception
 	 */
-	public void getJobStatus(int jobId);
+	public JobDataMap getJobDataMap(int jobId) throws Exception;
 	
 
 }
