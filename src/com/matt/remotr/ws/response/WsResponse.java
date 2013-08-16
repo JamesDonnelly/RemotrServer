@@ -44,6 +44,10 @@ public class WsResponse {
 	private String exceptionMessage;	
 	private String exceptionCause;
 	
+	//Version info
+	private String versionNum = this.getClass().getPackage().getImplementationVersion();
+	private String versionName;
+	
 	
 	// Information about the WsCall
 	@XmlAttribute(name="Success")
@@ -119,6 +123,16 @@ public class WsResponse {
 	@XmlElement(name="Error")
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+	
+	@XmlAttribute(name="VersionNum")
+	public String getVersionNum() {
+		return versionNum;
+	}
+
+	@XmlAttribute(name="VersionName")
+	public String getVersionName() {
+		return versionName;
 	}
 
 	public void setErrorMessage(String errorMessage) {
