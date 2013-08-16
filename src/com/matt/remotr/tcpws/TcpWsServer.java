@@ -19,6 +19,7 @@ import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
 import com.matt.remotr.core.event.Event;
 import com.matt.remotr.core.event.EventForwarder;
+import com.matt.remotr.core.event.JobEvent;
 import com.matt.remotr.main.jaxb.JaxbFactory;
 import com.matt.remotr.ws.response.WsResponse;
 
@@ -88,6 +89,13 @@ public class TcpWsServer extends Thread {
 		tcpWsCoordinator.unregister(this);
 	}
 	
+	private boolean checkDevice(){
+		if(device != null){
+			return true;
+		}
+		return false;
+	}
+	
 	public void run(){
 		running = true;
 		try{
@@ -134,19 +142,30 @@ public class TcpWsServer extends Thread {
 							}
 						}
 						
+						if(obj instanceof JobEvent){
+							if(checkDevice()){	
+								JobEvent jobEvent = (JobEvent) obj;
+								eventForwarder.forwardEvent(jobEvent, device);
+							}
+						}
+						
 						if(obj instanceof WsResponse){
-							WsResponse wsResponse = (WsResponse) obj;
-							if(wsResponse.getSubSystem().equalsIgnoreCase("pong")){
-								if(wsResponse.getResponse() != null){
-									log.warn("Discarding wrapped response object");
+							if(checkDevice()){
+								WsResponse wsResponse = (WsResponse) obj;
+								if(wsResponse.getSubSystem().equalsIgnoreCase("pong")){
+									if(wsResponse.getResponse() != null){
+										log.warn("Discarding wrapped response object");
+									}
+									deviceCoordinator.setHeartbeatTime(device);
 								}
-							deviceCoordinator.setHeartbeatTime(device);
 							}
 						}
 						
 						if(obj instanceof Event){
-							Event event = (Event) obj;
-							eventForwarder.forwardEvent(event, device);
+							if(checkDevice()){
+								Event event = (Event) obj;
+								eventForwarder.forwardEvent(event, device);
+							}
 						}
 						
 					}catch(JAXBException je){
@@ -160,7 +179,7 @@ public class TcpWsServer extends Thread {
 					}
 				}  
 			}catch(Exception e){
-				log.warn("Error ["+e.getMessage()+"]");
+				log.warn("Error ["+e.getMessage()+"]", e);
 				shutdownAndCleanUp();
 		    }
 		}
