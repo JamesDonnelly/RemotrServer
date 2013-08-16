@@ -12,14 +12,24 @@ public class JaxbFactory {
 	static{
 		try{
 			JAXBContext context = JAXBContext.newInstance(new Class[] {
+					// Device classes
 					com.matt.remotr.core.argument.Argument.class,
 					com.matt.remotr.core.command.Command.class,
 					com.matt.remotr.core.device.DeviceType.class,
 					com.matt.remotr.core.device.Device.class,
+					
+					// Event classes
 					com.matt.remotr.core.event.EventType.class,
 					com.matt.remotr.core.event.Event.class,
+					com.matt.remotr.core.event.JobEvent.class,
+					
+					// Response classes
 					com.matt.remotr.ws.response.WsResponse.class,
-					com.matt.remotr.ws.response.WsDeviceResponse.class
+					com.matt.remotr.ws.response.WsDeviceResponse.class,
+					com.matt.remotr.ws.response.WsJobResponse.class,
+					
+					// Job classes
+					com.matt.remotr.core.job.JobStatus.class
 					});
 			
 			marshaller = context.createMarshaller();
