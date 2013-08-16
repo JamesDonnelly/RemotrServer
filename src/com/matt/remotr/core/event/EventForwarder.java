@@ -26,10 +26,20 @@ public interface EventForwarder {
 	
 	
 	/**
-	 * Forwards the given event and caches it against the given device
+	 * Forwards the given event and caches it against the given device.
+	 * This method uses {@link EventType} to decide what to do with the event
 	 * @param event
 	 * @param device
 	 */
 	public void forwardEvent(Event event, Device device);
+	
+	/**
+	 * Forwards the given event from the device (and caches it) to the second device
+	 * NOTE: This method does no checking of {@link EventType}
+	 * @param event
+	 * @param fromDevice
+	 * @param toDevice
+	 */
+	public void forwardEvent(Event event, Device fromDevice, Device toDevice);
 
 }

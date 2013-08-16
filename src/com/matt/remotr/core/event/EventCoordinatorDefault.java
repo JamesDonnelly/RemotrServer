@@ -10,24 +10,26 @@ import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceCoordinatorDefault;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.job.CommandForwarder;
+import com.matt.remotr.core.job.RemotrJob;
 import com.matt.remotr.tcpws.TcpWsSender;
+import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponse;
 
 /**
  * The default implementation of the EventCoordinator. 
- * This is responsible for passing all incoming events on either TcpWs or SOAP Ws to the correct place
+ * This is responsible for passing all incoming events and commands (running in jobs) on either TcpWs or SOAP Ws to the correct place
  * All devices entering this class are replaced by the instance stored in the {@link DeviceCoordinatorDefault}
  * @author mattm
  *
  */
-public class EventCoordinatorDefault implements EventCoordinator {
+public class EventCoordinatorDefault implements EventCoordinator, CommandForwarder {
 	private Logger log;
 	private TcpWsSender tcpWsSender;
 	private DeviceCoordinator deviceCoordinator;
 	private Map<Device, ArrayList<Event>> deviceEventMap; // Holds a map of events and what device they have originated from
 	private Map<EventType, ArrayList<Device>> eventTypeDeviceMap; // Holds a list of devices that are interested in an event type
 	private ArrayList<EventReceiver> eventReceiverList; // Holds a list of event receivers that have registered
-	private Device systemDevice;
 	
 	public EventCoordinatorDefault(){
 		log = Logger.getLogger(getClass());
@@ -172,13 +174,12 @@ public class EventCoordinatorDefault implements EventCoordinator {
 				cacheEvent(event, device);
 				if(event.getEventType() == EventType.BROADCAST){
 					log.debug("Event ["+event.getName()+"] is a broadcast event");
-					handleBroadcastEvent(event);				
+					handleBroadcastEvent(event);
+				}else if(event.getEventType() == EventType.JOB){
+					log.debug("Event ["+event.getName()+"] is a job (probably a response) event");
+					handleJobEvent(event);
 				}else{
-					log.debug("Event ["+event.getName()+"] is a ["+event.getEventType().toString()+"]");
-					WsResponse wsResponse = new WsResponse();
-					wsResponse.setResponse(event);
-					wsResponse.setSubSystem("EventCoordinator");
-					wsResponse.setSuccess(true);
+					WsResponse wsResponse = wrapEvent(event);
 	
 					ArrayList<Device> deviceList = eventTypeDeviceMap.get(event.getEventType());
 					log.debug("Found ["+deviceList.size()+"] devices registered for EventType ["+event.getEventType().toString()+"]");
@@ -200,8 +201,55 @@ public class EventCoordinatorDefault implements EventCoordinator {
 						er.onEvent(event);
 					}
 				}
-				log.debug("Event ["+event.getName()+"] forwarded to "+eventReceiverList.size()+"] receivers");
+				log.debug("Event ["+event.getName()+"] forwarded to ["+eventReceiverList.size()+"] receivers");
 			}
+		}
+	}
+	
+	@Override
+	public void forwardEvent(Event event, Device fromDevice, Device toDevice) {
+		if(toDevice != null && fromDevice != null && event != null){
+			toDevice = getDeviceFromCoordinator(toDevice);
+			fromDevice = getDeviceFromCoordinator(fromDevice);
+			log.info("Forwarding Event >> ["+event.getName()+"] via TcpWs to ["+toDevice.getName()+"]");
+			cacheEvent(event, fromDevice);
+			
+			WsResponse wsResponse = wrapEvent(event);
+			tcpWsSender.sendMessage(toDevice, wsResponse);	
+		}
+	}
+		
+	private WsResponse wrapEvent(Event event){
+		log.debug("Event ["+event.getName()+"] is a ["+event.getEventType().toString()+"]");
+		WsResponse wsResponse = new WsResponse();
+		wsResponse.setResponse(event);
+		wsResponse.setSubSystem("EventCoordinator");
+		wsResponse.setSuccess(true);
+
+		return wsResponse;
+	}
+
+	@Override
+	public void forwardJob(Device device, RemotrJob job) {
+		if(device !=null){
+			getDeviceFromCoordinator(device);
+			if(device != null || job != null){
+				log.info("Forwarding RemotrJob >> ["+job.getJobName()+"] via TcpWs");
+				// Commands are not cached
+				WsJobResponse jobResponse = new WsJobResponse();
+				jobResponse.setCommand(job.getCommand());
+				jobResponse.setCronExpression(job.getCronExpression());
+				jobResponse.setJobName(job.getJobName());
+				jobResponse.setJobStatus(job.getJobStatus());
+				
+				jobResponse.setSubSystem("JobCoordinator");
+				jobResponse.setSuccess(true);
+				
+				log.debug("Forwarding to ["+device.getName()+"]");
+				tcpWsSender.sendMessage(device, jobResponse);				
+			}
+		}else{
+			log.error("Error forwarding job");
 		}
 	}
 	
@@ -211,6 +259,10 @@ public class EventCoordinatorDefault implements EventCoordinator {
 		wsResponse.setSubSystem("EventCoordinator");
 		wsResponse.setSuccess(true);
 		tcpWsSender.sendMessage(wsResponse);
+	}
+	
+	private void handleJobEvent(Event event) {
+		forwardEvent(event, null);		
 	}
 	
 	private Device getDeviceFromCoordinator(Device device){
