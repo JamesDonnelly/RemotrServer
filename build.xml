@@ -71,6 +71,7 @@
 	<target name="init" depends="remove-bin">
 		<echo message="Creating new dirs" />
 		<mkdir dir="${buildDir}" />
+		<mkdir dir="${buildDir}/WebContent/lib" />
 		<mkdir dir="${distDir}" />
 		<mkdir dir="${docDir}" />
 		<mkdir dir="${binDir}" />
