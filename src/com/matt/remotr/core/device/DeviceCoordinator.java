@@ -14,6 +14,8 @@ public interface DeviceCoordinator {
 	
 	public Device getDevice(Device device) throws DeviceException;
 	
+	public Device getSystemDevice() throws DeviceException;
+	
 	public Device getDeviceByPos(int id) throws DeviceException;
 	
 	public Device getDeviceById(Long id) throws DeviceException;
@@ -23,5 +25,6 @@ public interface DeviceCoordinator {
 	public Long getHeartbeatTime(Device device) throws DeviceException;
 	
 	public void setHeartbeatTime(Device device) throws DeviceException;
+	
 
 }

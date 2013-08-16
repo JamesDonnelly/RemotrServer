@@ -57,14 +57,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	public boolean register(Device device) throws DeviceException {		
 		log.info("Incoming request to register device ["+device.getName()+"]");
 		if(devices.addByDevice(device)){
-			session = HibernateUtil.getSessionFactory().openSession();
+			//session = HibernateUtil.getSessionFactory().openSession();
 			Transaction transaction = null;
 			
 			try{
 				transaction = session.beginTransaction();
 				Long deviceId = (Long) session.save(device);
 				device.setId(deviceId);
-				for(Command c : device.getCommands()){
+				for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
 					c.setDeviceId(deviceId);
 				}
 				transaction.commit();
@@ -86,7 +86,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	@Override
 	public boolean deregister(Device device) throws DeviceException {
 		log.info("Incoming request to deregister device ["+device.getName()+"]");
-		session = HibernateUtil.getSessionFactory().openSession();
+		//session = HibernateUtil.getSessionFactory().openSession();
 		
 		try{
 			session.beginTransaction();
@@ -131,6 +131,16 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			log.warn(message);
 			throw new DeviceException(message);
 		}
+	}
+	
+	@Override
+	public Device getSystemDevice() throws DeviceException {
+		Device d = new Device();
+		d.setName("SYSTEM");
+		d.setType(DeviceType.SYSTEM);
+		
+		d = getDevice(d);
+		return d;
 	}
 
 	@Override
@@ -182,7 +192,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	private void triggerRecache(){
 		log.info("Device Coordinator recache triggered: Attempting to get persisted devices from database");
 		try{
-			session = HibernateUtil.getSessionFactory().openSession();
+			//session = HibernateUtil.getSessionFactory().openSession();
 			Query queryResult = session.createQuery("from Device");   
 			List<?> tmpDevices = queryResult.list();
 			devices.removeAll();
