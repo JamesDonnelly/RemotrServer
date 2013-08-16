@@ -1,27 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+       
+    <context:annotation-config />
 
-    <!-- Device Subsystem -->
+	<!-- Device Subsystem -->
 	<bean id="deviceCoordinator" class="com.matt.remotr.core.device.DeviceCoordinatorDefault" />
 	<bean id="deviceCoordinatorWs" class="com.matt.remotr.core.device.DeviceCoordinatorWsImpl" autowire="default" />
-	
+
 	<!-- WsTcp Subsystem -->
 	<bean id="tcpCoordinator" class="com.matt.remotr.tcpws.TcpWsCoordinatorDefault">
 		<constructor-arg name="tcpWsEnabled" value="true" />
-		<constructor-arg name="portNumber" value="3030"/>
+		<constructor-arg name="portNumber" value="3030" />
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
-		<property name="eventForwarder" ref="eventCoordinator"/>
-		<property name="maxConnections" value="10"/>
+		<property name="eventForwarder" ref="eventCoordinator" />
+		<property name="maxConnections" value="10" />
 	</bean>
-	 
+
 	<!-- Event Subsystem -->
-	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault" >
-	    <property name="deviceCoordinator" ref="deviceCoordinator"/>
-	    <property name="tcpWsSender" ref="tcpCoordinator" />
+	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault">
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
+		<property name="tcpWsSender" ref="tcpCoordinator" />
 	</bean>
 	<bean id="eventCoordinatorWs" class="com.matt.remotr.core.event.EventCoordinatorWsImpl" autowire="default" />
+
+	<!-- Job subsystem -->
+	<bean id="jobCoordinator" class="com.matt.remotr.core.job.JobCoordinatorDefault">
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
+		<property name="eventCoordinator" ref="eventCoordinator" />
+	</bean>
+	<!-- bean name="jobSender" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass" value="com.matt.core.job.CommandJob" />
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="eventForwarder">
+					<ref bean="eventCoordinator" />
+				</entry>
+			</map>
+		</property>
+	</bean-->
 
 </beans>
