@@ -7,6 +7,7 @@
 	<property name="binDir" value="${buildDir}/bin" />
 	<property name="distDir" value="./dist" />
 	<property name="docDir" location="./doc" />
+	<property name="reportsDir" value="./reports" />
 	<property name="testDir" value="./test" />
 	<property name="warFileName" value="remotr.war" />
 	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
@@ -14,11 +15,11 @@
 	<property name="deployDir" value="/usr/local/jboss/standalone/deployments"/>
 	
 	<!-- libs -->
-	<property name="hibernate.lib" value="/home/matt/remotr/builds/lib/hibernate-release-4.2.2.Final\lib\required" />
-	<property name="hibernatejpa.lib" value="/home/matt/remotr/builds/lib/hibernate-release-4.2.2.Final\lib\jpa" />
+	<property name="hibernate.lib" value="/home/matt/remotr/builds/lib/hibernate-release-4.2.2.Final/lib/required" />
+	<property name="hibernatejpa.lib" value="/home/matt/remotr/builds/lib/hibernate-release-4.2.2.Final/lib/jpa" />
 	<property name="spring.lib" value="/home/matt/remotr/builds/lib/spring framework" />
 	<property name="log.lib" value="/home/matt/remotr/builds/lib/log4j" />
-	<property name="quartz.lib" value="/home/matt/remotr/builds/lib/quartz-2.2.0\lib" />
+	<property name="quartz.lib" value="/home/matt/remotr/builds/lib/quartz-2.2.0/lib" />
 	<property name="servlet.lib" value="/home/matt/remotr/builds/lib/servlet-api" />
 	<property name="mysql.lib" value="/home/matt/remotr/builds/lib/mysql-connector" />
 	<property name="junit.lib" value="/home/matt/remotr/builds/lib/junit4.10" />
@@ -60,6 +61,11 @@
 	</fileset>
 
 	<!-- TARGETS -->
+	<target name="remove-after-fail" if="test.failed">
+	    <echo message="Removing build dir after test fail" />
+	    <delete dir="${buildDir}" />
+	</target>
+	
 	<target name="remove-docs">
 	    <delete dir="${docDir}" />
 	</target>
@@ -84,6 +90,7 @@
 		<mkdir dir="${docDir}" />
 		<mkdir dir="${binDir}" />
 		<mkdir dir="${binDir}/test" />
+		<mkdir dir="${reportDir}" />
 		<echo message="Completed init." />
 	</target>
 
@@ -165,14 +172,26 @@
 	<target name="test-war" depends="compileTests">
 		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
 			<classpath refid="test-classpath" />
+			<formatter type="plain" usefile="false" />
+			<formatter type="xml"/>
 			<batchtest>
 				<fileset dir="${binDir}/test">
 					<include name="**/*Test*" />
 				</fileset>
 			</batchtest>
-			<formatter type="brief" usefile="false" />
 		</junit>
-		<fail message="Test failure detected, check test results." if="test.failed" />
+		<antcall target="remove-after-fail" />
+	</target>
+	
+	<target name="test-war-report" depends="test-war">
+	    <mkdir dir="${reportDir}/html"/>
+	    <junitreport todir="${reportsDir}">
+	        <fileset dir="${reportDir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report todir="${reportDir}/html"/>
+        </junitreport>
+        <fail message="Test failure detected, check test results." if="test.failed" />
 		<antcall target="tidy-war" />
 	</target>
 	
