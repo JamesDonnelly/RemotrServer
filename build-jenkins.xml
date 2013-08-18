@@ -90,7 +90,7 @@
 		<mkdir dir="${docDir}" />
 		<mkdir dir="${binDir}" />
 		<mkdir dir="${binDir}/test" />
-		<mkdir dir="${reportDir}" />
+		<mkdir dir="${reportsDir}" />
 		<echo message="Completed init." />
 	</target>
 
