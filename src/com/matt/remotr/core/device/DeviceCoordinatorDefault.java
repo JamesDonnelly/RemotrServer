@@ -50,6 +50,8 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			log.error("Error restoring persisted devices", e);
 			log.error("Panicing - Removing all devices from device list (List currently holds ["+devices.size()+"] devices");
 			devices.removeAll();
+		}finally{
+			session.close();
 		}
 	}
 
@@ -89,6 +91,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		//session = HibernateUtil.getSessionFactory().openSession();
 		
 		try{
+			device = getDevice(device);
+			if(device.getName().equals("SYSTEM")){
+				throw new DeviceException("Can not remove system device ["+device.getName()+"]");
+			}
 			session.beginTransaction();
 			session.delete(device);
 			session.getTransaction().commit();
@@ -98,6 +104,8 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		}catch(HibernateException he){
 			log.error("Error removing persisted object", he);
 			throw new DeviceException("Error removing persisted object");
+		}finally{
+			session.close();
 		}
 	}
 
