@@ -7,6 +7,7 @@
 	<property name="binDir" value="${buildDir}/bin" />
 	<property name="distDir" value="./dist" />
 	<property name="docDir" location="./doc" />
+	<property name="testDir" value="./test" />
 	<property name="warFileName" value="remotr.war" />
 	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
 	<property name="debug" value="true" />
@@ -20,6 +21,7 @@
 	<property name="quartz.lib" value="/home/matt/remotr/builds/lib/quartz-2.2.0\lib" />
 	<property name="servlet.lib" value="/home/matt/remotr/builds/lib/servlet-api" />
 	<property name="mysql.lib" value="/home/matt/remotr/builds/lib/mysql-connector" />
+	<property name="junit.lib" value="/home/matt/remotr/builds/lib/junit4.10" />
 	
 	<property file="${sourceDir}/version.properties" />
 	
@@ -46,6 +48,12 @@
             <include name="*.jar"/>
         </fileset>
     </path>
+    
+	<path id="test-classpath"> 
+  		<pathelement location="${junit.lib}/junit-4.10.jar" /> 
+  		<pathelement location="${binDir}/test" /> 
+  		<path refid="compile-classpath" />	 
+	</path>
 	
 	<fileset dir="${hibernate.lib}" casesensitive="yes">
 		<include name="**/*.jar" />
@@ -75,6 +83,7 @@
 		<mkdir dir="${distDir}" />
 		<mkdir dir="${docDir}" />
 		<mkdir dir="${binDir}" />
+		<mkdir dir="${binDir}/test" />
 		<echo message="Completed init." />
 	</target>
 
@@ -108,7 +117,15 @@
             <classpath refid="compile-classpath" />
         </javac>
     </target>
-	
+    
+	<target name="compileTests" depends="compile">
+	    <echo message="Building tests" />
+		<javac srcdir="${testDir}" destdir="${binDir}/test"
+			includeantruntime="true" debuglevel="lines,vars,source" source="1.6"
+			target="1.6" encoding="UTF-8" >
+			<classpath refid="test-classpath" />
+		</javac>
+	</target>
 	
 	<target name="war" depends="compile">
 		<echo message="Creating WAR file" />
@@ -116,7 +133,7 @@
 		    <manifest>
 		    	<attribute name="Implementation-Version" value="${version}"/>
 		    </manifest>
-			<lib dir="${buildDir}/WebContent/WEB-INF/lib" />
+			<!-- lib dir="${buildDir}/WebContent/WEB-INF/lib" / -->
 			<lib dir="${hibernate.lib}" />
 			<lib dir="${hibernatejpa.lib}" />
 			<lib dir="${quartz.lib}" />
@@ -145,8 +162,18 @@
 	    <delete dir="{$buildDir}/classes" />
 	</target>
 	
-	<target name="test-war" depends="tidy-war">
-	    <echo message="Not yet done" />
+	<target name="test-war" depends="compileTests">
+		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
+			<classpath refid="test-classpath" />
+			<batchtest>
+				<fileset dir="${binDir}/test">
+					<include name="**/*Test*" />
+				</fileset>
+			</batchtest>
+			<formatter type="brief" usefile="false" />
+		</junit>
+		<fail message="Test failure detected, check test results." if="test.failed" />
+		<antcall target="tidy-war" />
 	</target>
 	
 </project>

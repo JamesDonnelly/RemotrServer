@@ -1,17 +1,18 @@
 <?xml version="1.0" ?>
 <project name="Remotr Server" default="tidy-war" basedir=".">
 	<!-- PROPERTIES -->
-	<property name="sourceDir" location="./src" />
+	<property name="sourceDir" value="./src" />
 	<property name="buildDir" value="./build" />
-	<property name="webcontentDir" location="./WebContent" />
+	<property name="webcontentDir" value="./WebContent" />
 	<property name="binDir" value="${buildDir}/bin" />
 	<property name="distDir" value="./dist" />
-	<property name="docDir" location="./doc" />
+	<property name="docDir" value="./doc" />
+	<property name="testDir" value="./test" />
 	<property name="warFileName" value="remotr.war" />
 	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
 	<property name="debug" value="true" />
-	<property name="deployDir" value="/usr/local/jboss/standalone/deployments"/>
-	
+	<property name="deployDir" value="/usr/local/jboss/standalone/deployments" />
+
 	<!-- libs -->
 	<property name="hibernate.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\required" />
 	<property name="hibernatejpa.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\jpa" />
@@ -20,69 +21,75 @@
 	<property name="quartz.lib" value="C:\java\quartz-2.2.0\lib" />
 	<property name="servlet.lib" value="C:\Program Files\eclipse\plugins\com.google.appengine.eclipse.sdkbundle_1.8.0\appengine-java-sdk-1.8.0\lib\shared" />
 	<property name="mysql.lib" value="C:\java\mysql-connector-java-5.1.25\lib" />
-	
+	<property name="junit.lib" value="C:\java\junit4.10\" />
+
 	<property file="${sourceDir}/version.properties" />
-	
+
 	<path id="compile-classpath">
-        <fileset dir="${hibernate.lib}">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${hibernatejpa.lib}">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${spring.lib}">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${log.lib}">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${quartz.lib}">
-            <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${servlet.lib}">
-            <include name="servlet-api.jar"/>
-        </fileset>
-        <fileset dir="${mysql.lib}">
-            <include name="*.jar"/>
-        </fileset>
-    </path>
+		<fileset dir="${hibernate.lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${hibernatejpa.lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${spring.lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${log.lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${quartz.lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${servlet.lib}">
+			<include name="servlet-api.jar" />
+		</fileset>
+		<fileset dir="${mysql.lib}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
 	
+	<path id="test-classpath"> 
+  		<pathelement location="${junit.lib}/junit-4.10.jar" /> 
+  		<pathelement location="${binDir}/test" /> 
+  		<path refid="compile-classpath" />	 
+	</path>
+
 	<fileset dir="${hibernate.lib}" casesensitive="yes">
 		<include name="**/*.jar" />
 	</fileset>
 
 	<!-- TARGETS -->
 	<target name="remove-docs">
-	    <delete dir="${docDir}" />
+		<delete dir="${docDir}" />
 	</target>
-	
+
 	<target name="remove-builds">
-	    <echo message="Removing all dirs" />
+		<echo message="Removing all dirs" />
 		<delete dir="${buildDir}" />
 		<delete dir="${distDir}" />
 	</target>
-	
+
 	<target name="remove-bin" depends="remove-builds">
-	    <echo message="Removing bin dir" />
-	    <delete dir="${baseDir}/bin" />
-	    <delete dir="${binDir}" />
+		<echo message="Removing bin dir" />
+		<delete dir="${baseDir}/bin" />
+		<delete dir="${binDir}" />
 	</target>
-	
+
 	<target name="init" depends="remove-bin">
 		<echo message="Creating new dirs" />
 		<mkdir dir="${buildDir}" />
-		<mkdir dir="${buildDir}/WebContent/lib" />
 		<mkdir dir="${distDir}" />
 		<mkdir dir="${docDir}" />
 		<mkdir dir="${binDir}" />
+		<mkdir dir="${binDir}/test" />
 		<echo message="Completed init." />
 	</target>
 
 	<target name="build" depends="init">
 		<echo message="Copying files to build directory" />
-		<copy todir="${buildDir}/" verbose="${debug}"
-			preservelastmodified="true">
-			<fileset dir="${basedir}" excludes="${imageFiles}">
+		<copy todir="${buildDir}/" verbose="${debug}" preservelastmodified="true">
+			<fileset dir="${basedir}">
 				<exclude name="${buildDir}/" />
 				<exclude name="${distDir}/" />
 				<exclude name="build.xml" />
@@ -94,59 +101,75 @@
 
 		<echo message="File copy complete" />
 	</target>
-	
+
 	<target name="compile" depends="build">
-	    <echo message="Building source" />
-        <javac srcdir="${sourceDir}"
-               destdir="${binDir}"
-               debug="true"
-               debuglevel="lines,vars,source"
-               source="1.6"
-               target="1.6"
-               encoding="UTF-8"
-			   includeantruntime="false">
-            <classpath refid="compile-classpath" />
-        </javac>
-    </target>
-	
+		<echo message="Building source" />
+		<javac srcdir="${sourceDir}" destdir="${binDir}" debug="true"
+			debuglevel="lines,vars,source" source="1.6" target="1.6" encoding="UTF-8"
+			includeantruntime="false">
+			<classpath refid="compile-classpath" />
+		</javac>
+	</target>
+
+	<target name="compileTests" depends="compile">
+	    <echo message="Building tests" />
+		<javac srcdir="${testDir}" destdir="${binDir}/test"
+			includeantruntime="true" debuglevel="lines,vars,source" source="1.6"
+			target="1.6" encoding="UTF-8" >
+			<classpath refid="test-classpath" />
+		</javac>
+	</target>
 	
 	<target name="war" depends="compile">
 		<echo message="Creating WAR file" />
 		<war destfile="${distDir}/${warFileName}" webxml="${buildDir}/WebContent/WEB-INF/web.xml">
-		    <manifest>
-		    	<attribute name="Implementation-Version" value="${version}"/>
-		    </manifest>
+			<manifest>
+				<attribute name="Implementation-Version" value="${version}" />
+			</manifest>
 			<lib dir="${buildDir}/WebContent/WEB-INF/lib" />
 			<lib dir="${hibernate.lib}" />
 			<lib dir="${hibernatejpa.lib}" />
 			<lib dir="${quartz.lib}" />
 			<lib dir="${spring.lib}" />
 			<lib dir="${mysql.lib}" />
-			<zipfileset dir="${buildDir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes"/>
-			<zipfileset dir="${buildDir}/src" includes="hibernate.properties" prefix="WEB-INF/classes"/>
+			<zipfileset dir="${buildDir}/src" includes="hibernate.cfg.xml"
+				prefix="WEB-INF/classes" />
+			<zipfileset dir="${buildDir}/src" includes="hibernate.properties"
+				prefix="WEB-INF/classes" />
 			<classes dir="${binDir}" />
-		</war>	
+		</war>
 		<echo message="WAR file created." />
 		<echo message="Copying config to dist" />
-		<copy file="${webcontentDir}/WEB-INF/spring.xml" todir="${distDir}" overwrite="true"/>
+		<copy file="${webcontentDir}/WEB-INF/spring.xml" todir="${distDir}"
+			overwrite="true" />
 	</target>
-	
+
 	<target name="doc" depends="remove-docs">
-	    <delete dir="${docDir}" />
-	    <mkdir dir="${docDir}" />
+		<delete dir="${docDir}" />
+		<mkdir dir="${docDir}" />
 		<javadoc sourcepath="${sourceDir}" destdir="${docDir}" />
 	</target>
-	
-	<target name="clean-all" depends="init" />	
-	
+
+	<target name="clean-all" depends="init" />
+
 	<target name="tidy-war" depends="war">
-	    <echo message="Tidying up..." />
-	    <delete dir="${buildDir}" />
-	    <delete dir="{$buildDir}/classes" />
+		<echo message="Tidying up..." />
+		<delete dir="${buildDir}" />
+		<delete dir="{$buildDir}/classes" />
 	</target>
-	
-	<target name="test-war" depends="tidy-war">
-	    <echo message="Not yet done" />
+
+	<target name="test-war" depends="compileTests">
+		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
+			<classpath refid="test-classpath" />
+			<batchtest>
+				<fileset dir="${binDir}/test">
+					<include name="**/*Test*" />
+				</fileset>
+			</batchtest>
+			<formatter type="brief" usefile="false" />
+		</junit>
+		<fail message="Test failure detected, check test results." if="test.failed" />
+		<antcall target="tidy-war" />
 	</target>
-	
+
 </project>
