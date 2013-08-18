@@ -2,13 +2,13 @@
 <project name="Remotr Server" default="tidy-war" basedir=".">
 	<!-- PROPERTIES -->
 	<property name="sourceDir" location="./src" />
-	<property name="buildDir" value="./build" />
+	<property name="buildDir" location="./build" />
 	<property name="webcontentDir" location="./WebContent" />
 	<property name="binDir" value="${buildDir}/bin" />
-	<property name="distDir" value="./dist" />
+	<property name="distDir" location="./dist" />
 	<property name="docDir" location="./doc" />
-	<property name="reportsDir" value="./reports" />
-	<property name="testDir" value="./test" />
+	<property name="reportsDir" location="./reports" />
+	<property name="testDir" location="./test" />
 	<property name="warFileName" value="remotr.war" />
 	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
 	<property name="debug" value="true" />
@@ -172,9 +172,9 @@
 	<target name="test-war" depends="compileTests">
 		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
 			<classpath refid="test-classpath" />
-			<formatter type="plain" usefile="false" />
+			<formatter type="brief" usefile="false" />
 			<formatter type="xml"/>
-			<batchtest>
+			<batchtest todir="${reportDir}">
 				<fileset dir="${binDir}/test">
 					<include name="**/*Test*" />
 				</fileset>
