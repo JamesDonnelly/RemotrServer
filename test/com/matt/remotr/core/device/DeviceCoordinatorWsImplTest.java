@@ -6,9 +6,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.matt.remotr.ws.response.WsDeviceResponse;
+
 public class DeviceCoordinatorWsImplTest {
+	private DeviceCoordinatorWsImpl impl;
+	private DeviceCoordinatorDefault deviceCoordinator;
 
 	public DeviceCoordinatorWsImplTest() {
+		impl = new DeviceCoordinatorWsImpl();
 	}
 
 	@Before
@@ -20,13 +25,13 @@ public class DeviceCoordinatorWsImplTest {
 	}
 
 	@Test
-	public void testDeviceCoordinatorWsImpl() {
-		assertTrue(true);
-	}
-
-	@Test
 	public void testRegister() {
-		assertTrue(true);
+		Device device = new Device();
+		device.setName("Test Device");
+		device.setType(DeviceType.ANDROID);
+		WsDeviceResponse wds = impl.register(device);
+		
+		assertTrue(wds.isSuccess());
 	}
 
 	@Test
