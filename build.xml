@@ -52,7 +52,8 @@
 	
 	<path id="test-classpath"> 
   		<pathelement location="${junit.lib}/junit-4.10.jar" /> 
-  		<pathelement location="${binDir}/test" /> 
+  		<pathelement location="${binDir}/test" />
+  		<pathelement location="${binDir}" />
   		<path refid="compile-classpath" />	 
 	</path>
 
@@ -64,6 +65,7 @@
 	<target name="remove-after-fail" if="test.failed">
 	    <echo message="Removing build dir after test fail" />
 	    <delete dir="${buildDir}" />
+	    <fail message="Test failure detected, check test results." if="test.failed" />
 	</target>
 	
 	<target name="remove-docs">
@@ -105,7 +107,6 @@
 				<exclude name="**/.git" />
 			</fileset>
 		</copy>
-
 		<echo message="File copy complete" />
 	</target>
 
@@ -121,7 +122,7 @@
 	<target name="compileTests" depends="compile">
 	    <echo message="Building tests" />
 		<javac srcdir="${testDir}" destdir="${binDir}/test"
-			includeantruntime="true" debuglevel="lines,vars,source" source="1.6"
+			includeantruntime="false" debuglevel="lines,vars,source" source="1.6"
 			target="1.6" encoding="UTF-8" >
 			<classpath refid="test-classpath" />
 		</javac>
@@ -170,7 +171,7 @@
 			<classpath refid="test-classpath" />
 			<formatter type="brief" usefile="false" />
 			<formatter type="xml"/>
-			<batchtest todir="${reportDir}">
+			<batchtest todir="${reportsDir}">
 				<fileset dir="${binDir}/test">
 					<include name="**/*Test*" />
 				</fileset>
@@ -180,14 +181,13 @@
 	</target>
 	
 	<target name="test-war-report" depends="test-war">
-	    <mkdir dir="${reportDir}/html"/>
+	    <mkdir dir="${reportsDir}/html"/>
 	    <junitreport todir="${reportsDir}">
-	        <fileset dir="${reportDir}">
+	        <fileset dir="${reportsDir}">
                 <include name="TEST-*.xml"/>
             </fileset>
-            <report todir="${reportDir}/html"/>
+            <report todir="${reportsDir}/html"/>
         </junitreport>
-        <fail message="Test failure detected, check test results." if="test.failed" />
 		<antcall target="tidy-war" />
 	</target>
 
