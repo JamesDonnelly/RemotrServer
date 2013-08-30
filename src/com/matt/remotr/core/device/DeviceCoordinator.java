@@ -22,9 +22,18 @@ public interface DeviceCoordinator {
 
 	public ArrayList<Device> getAllRegisteredDevices();
 	
+	@Deprecated
+	/**
+	 * Use updateDevice
+	 */
 	public Long getHeartbeatTime(Device device) throws DeviceException;
 	
+	@Deprecated
+	/**
+	 * Use updateDevice
+	 */
 	public void setHeartbeatTime(Device device) throws DeviceException;
-	
+
+	public void updateDevice(Device device) throws DeviceException;
 
 }

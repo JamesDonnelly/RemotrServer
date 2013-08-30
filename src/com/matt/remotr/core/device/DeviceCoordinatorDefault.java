@@ -10,6 +10,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.matt.remotr.core.command.Command;
+import com.matt.remotr.core.event.EventForwarder;
+import com.matt.remotr.core.event.EventType;
+import com.matt.remotr.core.event.types.DeviceEvent;
 import com.matt.remotr.main.hibernate.HibernateUtil;
 
 // TODO: Implement cascade deletes
@@ -22,11 +25,12 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	private DeviceList devices;
 	private Logger log;
 	private Session session;
+	private EventForwarder eventForwarder;
 	
 	public DeviceCoordinatorDefault(){
 		log = Logger.getLogger(this.getClass());
 		devices = new DeviceList();
-		
+				
 		try{
 			// On startup, get any persisted device objects from the db
 			log.info("Attempting to get persisted devices from database");
@@ -63,14 +67,23 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			Transaction transaction = null;
 			
 			try{
+				session = HibernateUtil.getSessionFactory().openSession();
 				transaction = session.beginTransaction();
 				Long deviceId = (Long) session.save(device);
 				device.setId(deviceId);
-				for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
-					c.setDeviceId(deviceId);
+				if(device.getCommands() != null){
+					for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
+						c.setDeviceId(deviceId);
+					}
 				}
 				transaction.commit();
 				log.info("Device ["+device.getName()+"] registered");
+				DeviceEvent event = new DeviceEvent();
+				event.setEventType(EventType.DEVICE_REGISTER);
+				event.setName("DeviceRegistered");
+				event.setDeviceName(device.getName());
+				event.setDeviceType(device.getType());
+				eventForwarder.forwardEvent(event, null);
 				return true;
 			}catch(HibernateException he){
 				log.error("Error persisting Device ["+device.getName()+"]", he);
@@ -91,6 +104,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		//session = HibernateUtil.getSessionFactory().openSession();
 		
 		try{
+			session = HibernateUtil.getSessionFactory().openSession();
 			device = getDevice(device);
 			if(device.getName().equals("SYSTEM")){
 				throw new DeviceException("Can not remove system device ["+device.getName()+"]");
@@ -197,10 +211,31 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		device.setLastHeatbeatTime(System.currentTimeMillis());		
 	}
 	
+	@Override
+	public void updateDevice(Device device) throws DeviceException {
+		if(checkDeviceRegistered(device)){
+			log.info("Updating device ["+device.getName()+"]");
+			devices.replace(device);
+			try{
+				session = HibernateUtil.getSessionFactory().openSession();
+				session.beginTransaction();
+				session.update(device);
+				session.getTransaction().commit();
+			}catch(HibernateException he){
+				log.error("Error persisting updated device ["+device.getName()+"]");
+				throw new DeviceException("Error updating device");
+			}finally{
+				session.close();
+			}
+		}else{
+			throw new DeviceException("Device ["+device.getName()+"] is not registered with this coordinator");
+		}
+	}
+	
 	private void triggerRecache(){
 		log.info("Device Coordinator recache triggered: Attempting to get persisted devices from database");
 		try{
-			//session = HibernateUtil.getSessionFactory().openSession();
+			session = HibernateUtil.getSessionFactory().openSession();
 			Query queryResult = session.createQuery("from Device");   
 			List<?> tmpDevices = queryResult.list();
 			devices.removeAll();
@@ -224,6 +259,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	
 	protected String getSubsystem(){
 		return "DeviceCoordinator";
+	}
+
+	public EventForwarder getEventForwarder() {
+		return eventForwarder;
+	}
+
+	public void setEventForwarder(EventForwarder eventForwarder) {
+		this.eventForwarder = eventForwarder;
 	}
 	
 }

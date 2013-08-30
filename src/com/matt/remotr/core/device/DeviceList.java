@@ -90,6 +90,13 @@ class DeviceList {
 		}
 	}
 	
+	public void replace(Device device){
+		if(devices.contains(device)){
+			int i = devices.indexOf(device);
+			devices.set(i, device);
+		}
+	}
+	
 	@XmlElement(name="Device")
 	@XmlElementWrapper(name="Devices")
 	public ArrayList<Device> getDevices(){
