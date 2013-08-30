@@ -16,17 +16,22 @@ public class JaxbFactory {
 					com.matt.remotr.core.argument.Argument.class,
 					com.matt.remotr.core.command.Command.class,
 					com.matt.remotr.core.device.DeviceType.class,
+					com.matt.remotr.core.device.ConnectionType.class,
 					com.matt.remotr.core.device.Device.class,
 					
 					// Event classes
 					com.matt.remotr.core.event.EventType.class,
-					com.matt.remotr.core.event.Event.class,
-					com.matt.remotr.core.event.JobEvent.class,
+					com.matt.remotr.core.event.types.Event.class,
+					com.matt.remotr.core.event.types.JobEvent.class,
+					com.matt.remotr.core.event.types.DeviceEvent.class,
 					
 					// Response classes
 					com.matt.remotr.ws.response.WsResponse.class,
 					com.matt.remotr.ws.response.WsDeviceResponse.class,
 					com.matt.remotr.ws.response.WsJobResponse.class,
+					
+					// Request classes
+					com.matt.remotr.ws.request.WsRequest.class,
 					
 					// Job classes
 					com.matt.remotr.core.job.JobStatus.class
@@ -39,7 +44,7 @@ public class JaxbFactory {
 	        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 
 		}catch(JAXBException e) {
-	       //
+	       System.out.println(e);
 	    }
 	}
 	
