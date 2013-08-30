@@ -12,6 +12,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.matt.remotr.main.Main;
+import com.matt.remotr.ws.request.WsRequest;
+
 /**
  * Lets any Jaxb annotated object be wrapped and exported via the web service methods.
  * For more specific wrapping, this class should be extended (Example: {@link WsDeviceResponse})
@@ -28,6 +31,11 @@ public class WsResponse {
 	 */
 	private boolean success = false;
 	private String subSystem;
+	
+	/**
+	 * This can be set to any string on the {@link WsRequest} and will be returned on the response
+	 */
+	private String refference;
 	/**
 	 * If not set explicitly, dateTime defaults to the time at which the response object was created
 	 */
@@ -45,8 +53,8 @@ public class WsResponse {
 	private String exceptionCause;
 	
 	//Version info
-	private String versionNum = this.getClass().getPackage().getImplementationVersion();
-	private String versionName;
+	private String versionNum = Main.getVersionNumber();
+	private String versionName = Main.getVersionName();
 	
 	
 	// Information about the WsCall
@@ -125,7 +133,7 @@ public class WsResponse {
 		return errorMessage;
 	}
 	
-	@XmlAttribute(name="VersionNum")
+	@XmlAttribute(name="VersionNumber")
 	public String getVersionNum() {
 		return versionNum;
 	}
@@ -139,6 +147,15 @@ public class WsResponse {
 		this.errorMessage = errorMessage;
 	}
 	
+	@XmlAttribute(name="Refference")
+	public String getRefference() {
+		return refference;
+	}
+
+	public void setRefference(String refference) {
+		this.refference = refference;
+	}
+
 	// Helper functions
 	private String convertTime(long time){
 	    Date date = new Date(time);

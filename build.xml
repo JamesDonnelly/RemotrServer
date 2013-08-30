@@ -23,6 +23,7 @@
 	<property name="servlet.lib" value="C:\Program Files\eclipse\plugins\com.google.appengine.eclipse.sdkbundle_1.8.0\appengine-java-sdk-1.8.0\lib\shared" />
 	<property name="mysql.lib" value="C:\java\mysql-connector-java-5.1.25\lib" />
 	<property name="junit.lib" value="C:\java\junit4.10\" />
+	<property name="smack.lib" value="C:\java\smack_3_3_0\" />
 
 	<property file="${sourceDir}/version.properties" />
 
@@ -43,16 +44,20 @@
 			<include name="*.jar" />
 		</fileset>
 		<fileset dir="${servlet.lib}">
-			<include name="servlet-api.jar" />
+			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${mysql.lib}">
 			<include name="*.jar" />
 		</fileset>
+		<fileset dir="${smack.lib}">
+		    <include name="smack.jar"/>
+		    <include name="smackx.jar"/>
+		</fileset>
 	</path>
 	
 	<path id="test-classpath"> 
-  		<pathelement location="${junit.lib}/junit-4.10.jar" /> 
-  		<pathelement location="${binDir}/test" />
+  		<pathelement location="${junit.lib}\junit-4.10.jar" /> 
+  		<pathelement location="${binDir}\test" />
   		<pathelement location="${binDir}" />
   		<path refid="compile-classpath" />	 
 	</path>
@@ -114,7 +119,7 @@
 		<echo message="Building source" />
 		<javac srcdir="${sourceDir}" destdir="${binDir}" debug="true"
 			debuglevel="lines,vars,source" source="1.6" target="1.6" encoding="UTF-8"
-			includeantruntime="false">
+			includeantruntime="true">
 			<classpath refid="compile-classpath" />
 		</javac>
 	</target>
@@ -122,9 +127,11 @@
 	<target name="compileTests" depends="compile">
 	    <echo message="Building tests" />
 		<javac srcdir="${testDir}" destdir="${binDir}/test"
-			includeantruntime="false" debuglevel="lines,vars,source" source="1.6"
+			includeantruntime="true" debuglevel="lines,vars,source" source="1.6"
 			target="1.6" encoding="UTF-8" >
-			<classpath refid="test-classpath" />
+			<classpath>
+			    <path refid="test-classpath" />
+			</classpath>
 		</javac>
 	</target>
 	
@@ -132,7 +139,8 @@
 		<echo message="Creating WAR file" />
 		<war destfile="${distDir}/${warFileName}" webxml="${buildDir}/WebContent/WEB-INF/web.xml">
 			<manifest>
-				<attribute name="Implementation-Version" value="${version}" />
+				<attribute name="Implementation-Version" value="${version.number}" />
+				<attribute name="Implementation-Title" value="${version.name}" />
 			</manifest>
 			<lib dir="${buildDir}/WebContent/WEB-INF/lib" />
 			<lib dir="${hibernate.lib}" />
@@ -140,10 +148,9 @@
 			<lib dir="${quartz.lib}" />
 			<lib dir="${spring.lib}" />
 			<lib dir="${mysql.lib}" />
-			<zipfileset dir="${buildDir}/src" includes="hibernate.cfg.xml"
-				prefix="WEB-INF/classes" />
-			<zipfileset dir="${buildDir}/src" includes="hibernate.properties"
-				prefix="WEB-INF/classes" />
+			<lib dir="${smack.lib}" />
+			<zipfileset dir="${buildDir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes" />
+			<zipfileset dir="${buildDir}/src" includes="hibernate.properties" prefix="WEB-INF/classes" />
 			<classes dir="${binDir}" />
 		</war>
 		<echo message="WAR file created." />
@@ -168,7 +175,9 @@
 
 	<target name="test-war" depends="compileTests">
 		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
-			<classpath refid="test-classpath" />
+			<classpath>
+			    <path refid="test-classpath" />
+			 </classpath>
 			<formatter type="brief" usefile="false" />
 			<formatter type="xml"/>
 			<batchtest todir="${reportsDir}">
