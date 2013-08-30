@@ -22,7 +22,7 @@ public class CommandJob extends RemotrJob implements Job {
 	private Logger log;
 	private JobDataMap dataMap;
 	private Device device;
-	private CommandForwarder commandForwarder;
+	private JobForwarder commandForwarder;
 	
 	private void init(JobExecutionContext context){
 		log = Logger.getLogger(this.getClass());
@@ -36,7 +36,7 @@ public class CommandJob extends RemotrJob implements Job {
 		cronExpression = (String) dataMap.get("cronexpression");
 		
 		device = (Device) dataMap.get("device");
-		commandForwarder = (CommandForwarder) dataMap.get("commandforwarder");
+		commandForwarder = (JobForwarder) dataMap.get("commandforwarder");
 	}
 
 	@Override

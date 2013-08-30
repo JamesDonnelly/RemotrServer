@@ -7,13 +7,13 @@ import org.apache.log4j.Logger;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinatorDefault;
 import com.matt.remotr.core.device.DeviceException;
-import com.matt.remotr.core.event.Event;
+import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.job.JobCoordinator;
-import com.matt.remotr.tcpws.TcpWsSender;
+import com.matt.remotr.tcpws.WsSender;
 
 /**
  * Manages the commands associated with the devices. Implements methods that can trigger commands when called
- * Note: Commands do not get wrapped in an {@link Event}. They get sent straight to the {@link TcpWsSender}
+ * Note: Commands do not get wrapped in an {@link Event}. They get sent straight to the {@link WsSender}
  * @author mattm
  *
  */

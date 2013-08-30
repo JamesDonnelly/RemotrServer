@@ -7,12 +7,12 @@ import com.matt.remotr.core.device.Device;
  * @author mattm
  *
  */
-public interface CommandForwarder {
+public interface JobForwarder {
 	
 	/**
-	 * Forwards the command to a device 
-	 * @param device
-	 * @param job
+	 * Forwards the job to a device 
+	 * @param device - The Device to which to send the job
+	 * @param job - The Job
 	 */
 	public void forwardJob(Device device, RemotrJob job);
 
