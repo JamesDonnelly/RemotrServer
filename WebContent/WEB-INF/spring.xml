@@ -10,7 +10,9 @@
     <context:annotation-config />
 
 	<!-- Device Subsystem -->
-	<bean id="deviceCoordinator" class="com.matt.remotr.core.device.DeviceCoordinatorDefault" />
+	<bean id="deviceCoordinator" class="com.matt.remotr.core.device.DeviceCoordinatorDefault">
+	    <property name="eventForwarder" ref="eventCoordinator" />
+	</bean>
 	<bean id="deviceCoordinatorWs" class="com.matt.remotr.core.device.DeviceCoordinatorWsImpl" autowire="default" />
 
 	<!-- WsTcp Subsystem -->
@@ -21,11 +23,19 @@
 		<property name="eventForwarder" ref="eventCoordinator" />
 		<property name="maxConnections" value="10" />
 	</bean>
+	
+	
+	<!-- XMPP SubSystem -->
+	<bean id="xmppCoordinator" class="com.matt.remotr.xmpp.XmppCoordinatorDefault">
+	    <constructor-arg name="xmppServerAddress" value="192.168.1.1" />
+	    <constructor-arg name="deviceCoordinator" ref="deviceCoordinator" />
+	</bean>
 
 	<!-- Event Subsystem -->
 	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="tcpWsSender" ref="tcpCoordinator" />
+		<property name="xmppWsSender" ref="xmppCoordinator" />
 	</bean>
 	<bean id="eventCoordinatorWs" class="com.matt.remotr.core.event.EventCoordinatorWsImpl" autowire="default" />
 
