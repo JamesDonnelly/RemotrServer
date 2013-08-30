@@ -30,6 +30,7 @@ public class Device implements Serializable {
 	private Long deviceId;
 	private String name;
 	private DeviceType type;
+	private ConnectionType connectionType;
 	private Long lastHeatbeatTime;
 	private boolean hasHeartbeat = false;
 	private ArrayList<Command> commands;
@@ -93,6 +94,14 @@ public class Device implements Serializable {
 		this.commands = commands;
 	}
 	
+	@XmlElement(name="Connection")
+	public ConnectionType getConnectionType() {
+		return connectionType;
+	}
+
+	public void setConnectionType(ConnectionType connectionType) {
+		this.connectionType = connectionType;
+	}
 
 	@Override
 	public int hashCode() {
