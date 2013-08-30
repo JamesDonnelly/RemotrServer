@@ -27,11 +27,11 @@ import com.matt.remotr.core.command.Command;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
-import com.matt.remotr.core.event.Event;
 import com.matt.remotr.core.event.EventCoordinator;
 import com.matt.remotr.core.event.EventReceiver;
 import com.matt.remotr.core.event.EventType;
-import com.matt.remotr.core.event.JobEvent;
+import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.JobEvent;
 
 /**
  * The default implementation of the {@link JobCoordinator}. This is responsible for creating and executing jobs, and creating JOB {@link EventType} to notify 

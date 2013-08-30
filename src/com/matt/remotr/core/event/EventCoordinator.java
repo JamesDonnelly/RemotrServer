@@ -3,6 +3,7 @@ package com.matt.remotr.core.event;
 import java.util.ArrayList;
 
 import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.event.types.Event;
 
 /**
  * All the EventCoordinator methods. Classes only interested in providing event forwarding should implement {@link EventForwarder}

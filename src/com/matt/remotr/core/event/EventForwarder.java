@@ -1,6 +1,7 @@
 package com.matt.remotr.core.event;
 
 import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.event.types.Event;
 
 /**
  * Interface for classes wishing to have the ability to forward events around the system
@@ -10,17 +11,18 @@ import com.matt.remotr.core.device.Device;
 public interface EventForwarder {
 	
 	/**
-	 * Caches an event without sending it. Returns the id of the cached event for reference
+	 * Can be called externally to cache an event from a device to send later. 
 	 * @param event
-	 * @param device
-	 * @return
+	 * @Param device
+	 * 
+	 * @return int
 	 */
 	public int cacheEvent(Event event, Device device);
 	
 	/**
-	 * Forwards the a cached event from the given device
-	 * @param device
-	 * @param id
+	 * Forwards a cached event to devices on the XMPP or TCPWS Service.
+	 * @param device - The device from which to take the cached event
+	 * @param id - The id of the cached event
 	 */
 	public void forwardEvent(Device device, int id);
 	

@@ -14,15 +14,17 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
+import com.matt.remotr.core.device.ConnectionType;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
-import com.matt.remotr.core.event.Event;
 import com.matt.remotr.core.event.EventForwarder;
-import com.matt.remotr.core.event.JobEvent;
+import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.JobEvent;
 import com.matt.remotr.main.jaxb.JaxbFactory;
 import com.matt.remotr.ws.response.WsResponse;
 
+// TODO: Remove calls to heartbeat update methods and use updateDevice
 public class TcpWsServer extends Thread {
 	public static int connectionsCount = 0;
 	public static int HEARTBEAT_WAIT = 60000;
@@ -126,9 +128,16 @@ public class TcpWsServer extends Thread {
 							try{
 								device = (Device) obj;
 								device = deviceCoordinator.getDevice(device);
+								device.setConnectionType(ConnectionType.TCPWS);
+								try{
+									deviceCoordinator.updateDevice(device);
+								}catch(DeviceException de){
+									// Meh.
+								}
 								log.debug("Replaced device reference with coordinator reference okay");
 							}catch(DeviceException de){
 								log.info("Device ["+device.getName()+"] is unknown to the Device Coordinator - Registering");
+								device.setConnectionType(ConnectionType.TCPWS);
 								deviceCoordinator.register(device);
 							}
 							

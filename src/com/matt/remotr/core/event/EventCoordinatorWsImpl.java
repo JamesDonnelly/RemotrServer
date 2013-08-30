@@ -9,6 +9,7 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.ws.EventCoordinatorWs;
 import com.matt.remotr.ws.response.WsResponse;
 

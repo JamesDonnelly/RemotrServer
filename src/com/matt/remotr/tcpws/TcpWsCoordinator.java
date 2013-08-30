@@ -5,11 +5,11 @@ import java.util.concurrent.BlockingQueue;
 import com.matt.remotr.core.device.Device;
 
 /**
- * Interface for classes implementing TCP Ws coordination. If the implementing class only wants to implement sending, then implement {@link TcpWsSender}
+ * Interface for classes implementing TCP Ws coordination. If the implementing class only wants to implement sending, then implement {@link WsSender}
  * @author mattm
  *
  */
-public interface TcpWsCoordinator extends TcpWsSender{
+public interface TcpWsCoordinator extends WsSender{
 	
 	/**
 	 * Register a server with the {@link TcpWsCoordinator} for a specific device

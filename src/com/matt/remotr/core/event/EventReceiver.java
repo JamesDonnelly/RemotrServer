@@ -1,5 +1,7 @@
 package com.matt.remotr.core.event;
 
+import com.matt.remotr.core.event.types.Event;
+
 /**
  * Classes wishing to receive events should implement this class, then register with the event coordinator
  * @author mattm

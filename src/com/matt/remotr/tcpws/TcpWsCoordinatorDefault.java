@@ -132,6 +132,7 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 		}		
 	}
 
+	@SuppressWarnings("static-access")
 	@Override
 	public void unregister(TcpWsServer server) {
 		synchronized (serverDevice) {

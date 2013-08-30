@@ -5,8 +5,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import com.matt.remotr.core.device.Device;
-import com.matt.remotr.core.event.Event;
 import com.matt.remotr.core.event.EventType;
+import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.ws.response.WsResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl")

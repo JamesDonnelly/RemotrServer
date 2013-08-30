@@ -6,13 +6,15 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.matt.remotr.core.device.ConnectionType;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceCoordinatorDefault;
 import com.matt.remotr.core.device.DeviceException;
-import com.matt.remotr.core.job.CommandForwarder;
+import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.job.JobForwarder;
 import com.matt.remotr.core.job.RemotrJob;
-import com.matt.remotr.tcpws.TcpWsSender;
+import com.matt.remotr.tcpws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponse;
 
@@ -23,9 +25,10 @@ import com.matt.remotr.ws.response.WsResponse;
  * @author mattm
  *
  */
-public class EventCoordinatorDefault implements EventCoordinator, CommandForwarder {
+public class EventCoordinatorDefault implements EventCoordinator, JobForwarder {
 	private Logger log;
-	private TcpWsSender tcpWsSender;
+	private WsSender tcpWsSender;
+	private WsSender xmppWsSender;
 	private DeviceCoordinator deviceCoordinator;
 	private Map<Device, ArrayList<Event>> deviceEventMap; // Holds a map of events and what device they have originated from
 	private Map<EventType, ArrayList<Device>> eventTypeDeviceMap; // Holds a list of devices that are interested in an event type
@@ -44,19 +47,18 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		this.deviceCoordinator = deviceCoordinator;
 	}
 
-	public void setTcpWsSender(TcpWsSender tcpWsSender) {
+	public void setTcpWsSender(WsSender tcpWsSender) {
 		this.tcpWsSender = tcpWsSender;
+	}
+
+	public void setXmppWsSender(WsSender xmppWsSender) {
+		this.xmppWsSender = xmppWsSender;
 	}
 
 	protected String getSubsystem(){
 		return "EventCoordinator";
 	}
 
-	/**
-	 * Allows a device to register for event notifications
-	 * @param device
-	 * @return
-	 */
 	@Override
 	public boolean registerForEvents(Device device, EventType eventType){
 		device = getDeviceFromCoordinator(device);
@@ -91,10 +93,6 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		return eventTypeDeviceMap.get(eventType).add(device);		
 	}
 	
-	/**
-	 * Returns the cached events that have originated from a given device
-	 * @param device
-	 */
 	@Override
 	public ArrayList<Event> getEvents(Device device) {
 		device = getDeviceFromCoordinator(device);
@@ -105,14 +103,7 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		}
 		return null;
 	}
-	
-	/**
-	 * Can be called externally to cache an event from a device to send later. 
-	 * @param event
-	 * @Param device
-	 * 
-	 * @return int
-	 */
+
 	@Override
 	public int cacheEvent(Event event, Device device){
 		device = getDeviceFromCoordinator(device);
@@ -134,23 +125,12 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		return -1;
 	}
 	
-	/**
-	 * Private cache function. Does no checking of device, event or the list. Must call cacheEvent
-	 * @param event
-	 * @param device
-	 * @return int
-	 */
 	private int cacheEventInternal(Event event, Device device){
 		log.info("Adding event ["+event.getName()+"] to cache for device ["+device.getName()+"]");
 		deviceEventMap.get(device).add(event);
 		return deviceEventMap.get(device).indexOf(event);		
 	}
 	
-	/**
-	 * Forwards a cached event to devices on the WsTcp Service.
-	 * @param device - The device from which to take the cached event
-	 * @param id - The id of the cached event
-	 */
 	@Override
 	public void forwardEvent(Device device, int id){
 		device = getDeviceFromCoordinator(device);
@@ -160,17 +140,12 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		}
 	}
 
-	/**
-	 * Forwards an event based on the @link{EventType}
-	 * @param event - The event to forward
-	 * @param device - The sender device
-	 */
 	@Override
 	public void forwardEvent(Event event, Device device) {
 		if(device != null){
 			device = getDeviceFromCoordinator(device);
 			if(event != null && !event.getName().isEmpty() && device !=null){
-				log.info("Forwarding Event >> ["+event.getName()+"] via TcpWs");
+				log.info("Forwarding Event >> ["+event.getName()+"]");
 				cacheEvent(event, device);
 				if(event.getEventType() == EventType.BROADCAST){
 					log.debug("Event ["+event.getName()+"] is a broadcast event");
@@ -182,10 +157,12 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 					WsResponse wsResponse = wrapEvent(event);
 	
 					ArrayList<Device> deviceList = eventTypeDeviceMap.get(event.getEventType());
-					log.debug("Found ["+deviceList.size()+"] devices registered for EventType ["+event.getEventType().toString()+"]");
-					for(Device d : deviceList){
-						log.debug("Forwarding to ["+d.getName()+"]");
-						tcpWsSender.sendMessage(d, wsResponse);
+					if(deviceList != null){
+						log.debug("Found ["+deviceList.size()+"] devices registered for EventType ["+event.getEventType().toString()+"]");
+						for(Device d : deviceList){
+							log.debug("Forwarding to ["+d.getName()+"]");
+							sendMessage(d, wsResponse);
+						}
 					}
 				}			
 			}else{
@@ -211,11 +188,11 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		if(toDevice != null && fromDevice != null && event != null){
 			toDevice = getDeviceFromCoordinator(toDevice);
 			fromDevice = getDeviceFromCoordinator(fromDevice);
-			log.info("Forwarding Event >> ["+event.getName()+"] via TcpWs to ["+toDevice.getName()+"]");
+			log.info("Forwarding Event >> ["+event.getName()+"] to ["+toDevice.getName()+"]");
 			cacheEvent(event, fromDevice);
 			
 			WsResponse wsResponse = wrapEvent(event);
-			tcpWsSender.sendMessage(toDevice, wsResponse);	
+			sendMessage(toDevice, wsResponse);	
 		}
 	}
 		
@@ -235,7 +212,7 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 			getDeviceFromCoordinator(device);
 			if(device != null || job != null){
 				log.info("Forwarding RemotrJob >> ["+job.getJobName()+"] via TcpWs");
-				// Commands are not cached
+				// Jobs are not cached
 				WsJobResponse jobResponse = new WsJobResponse();
 				jobResponse.setCommand(job.getCommand());
 				jobResponse.setCronExpression(job.getCronExpression());
@@ -246,7 +223,7 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 				jobResponse.setSuccess(true);
 				
 				log.debug("Forwarding to ["+device.getName()+"]");
-				tcpWsSender.sendMessage(device, jobResponse);				
+				sendMessage(device, jobResponse);				
 			}
 		}else{
 			log.error("Error forwarding job");
@@ -258,7 +235,7 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		wsResponse.setResponse(event);
 		wsResponse.setSubSystem("EventCoordinator");
 		wsResponse.setSuccess(true);
-		tcpWsSender.sendMessage(wsResponse);
+		sendMessage(wsResponse);
 	}
 	
 	private void handleJobEvent(Event event) {
@@ -273,6 +250,19 @@ public class EventCoordinatorDefault implements EventCoordinator, CommandForward
 		}
 		
 		return null;
+	}
+	
+	private void sendMessage(Device device, WsResponse wsResponse){
+		if(device.getConnectionType() == ConnectionType.TCPWS){
+			tcpWsSender.sendMessage(device, wsResponse);
+		}else{
+			xmppWsSender.sendMessage(device, wsResponse);
+		}
+	}
+	
+	private void sendMessage(WsResponse wsResponse){
+		tcpWsSender.sendMessage(wsResponse);
+		xmppWsSender.sendMessage(wsResponse);
 	}
 	
 }
