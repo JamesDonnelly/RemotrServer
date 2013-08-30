@@ -1,7 +1,10 @@
-package com.matt.remotr.core.event;
+package com.matt.remotr.core.event.types;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.matt.remotr.core.event.EventType;
 
 @XmlRootElement
 public class Event {
@@ -9,6 +12,7 @@ public class Event {
 	private int id;
 	private String name;
 	private EventType eventType;
+	private String refference;
 	
 	@XmlElement(name="ID")
 	public int getId() {
@@ -23,6 +27,15 @@ public class Event {
 	@XmlElement(name="Type")
 	public EventType getEventType() {
 		return eventType;
+	}
+
+	@XmlAttribute(name="Refference")
+	public String getRefference() {
+		return refference;
+	}
+
+	public void setRefference(String refference) {
+		this.refference = refference;
 	}
 
 	public void setEventType(EventType eventType) {
