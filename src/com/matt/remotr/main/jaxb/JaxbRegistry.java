@@ -8,8 +8,8 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class JaxbRegistry {
 
-	 @XmlElementDecl(name="string")
+	 @XmlElementDecl(name="String")
 	 public JAXBElement<String> createString(String str) {
-		 return new JAXBElement<String>(new QName("string"), String.class, str);
+		 return new JAXBElement<String>(new QName("String"), String.class, str);
 	 }	 
 }
