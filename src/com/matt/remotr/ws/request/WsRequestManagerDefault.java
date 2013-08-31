@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jws.WebMethod;
 import javax.xml.bind.JAXBElement;
 
 import org.apache.log4j.Logger;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.ws.response.WsDeviceResponse;
@@ -44,7 +46,8 @@ public class WsRequestManagerDefault implements WsRequestManager, WsRequestRunne
 			Map<Method, ArrayList<Class<?>>> methodParamMap = new HashMap<Method, ArrayList<Class<?>>>();
 			Method[] methods = requestRunner.getClass().getMethods();
 			for(Method m : methods){
-				if(m.getAnnotation(WsRequestMethod.class) != null){
+				if(AnnotationUtils.findAnnotation(m, WsRequestMethod.class) != null || 
+						AnnotationUtils.findAnnotation(m, WebMethod.class) != null){
 					// it's a WebMethod - add it to the list and see if it needs any params
 					ArrayList<Class<?>> paramList = new ArrayList<Class<?>>();
 					Class<?>[] paramTypes = m.getParameterTypes();
@@ -103,7 +106,7 @@ public class WsRequestManagerDefault implements WsRequestManager, WsRequestRunne
 				List<Class<?>> c = new ArrayList<Class<?>>();
 				for(WsRequestParameter p : params){
 					Class<?> clazz = Class.forName(p.getClassType());
-					JAXBElement element = (JAXBElement) p.getValue();
+					JAXBElement<?> element = (JAXBElement<?>) p.getValue();
 					Object o = element.getValue();
 					l.add(clazz.cast(o));	
 					c.add(clazz);
