@@ -6,10 +6,11 @@ import javax.jws.WebService;
 
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceType;
+import com.matt.remotr.ws.request.WsRequestRunner;
 import com.matt.remotr.ws.response.WsDeviceResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl")
-public interface DeviceCoordinatorWs {
+public interface DeviceCoordinatorWs extends WsRequestRunner {
 	
 	@WebMethod(operationName="RegisterDevice")
 	public WsDeviceResponse register(@WebParam(name="Device") Device device);
