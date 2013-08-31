@@ -24,11 +24,15 @@
 		<property name="maxConnections" value="10" />
 	</bean>
 	
+	<bean id="wsRequestManager" class="com.matt.remotr.ws.request.WsRequestManagerDefault">
+	    <property name="responseForwarder" ref="eventCoordinator"/>
+	</bean>
 	
 	<!-- XMPP SubSystem -->
 	<bean id="xmppCoordinator" class="com.matt.remotr.xmpp.XmppCoordinatorDefault">
 	    <constructor-arg name="xmppServerAddress" value="192.168.1.1" />
 	    <constructor-arg name="deviceCoordinator" ref="deviceCoordinator" />
+	    <property name="requestManager" ref="wsRequestManager" />
 	</bean>
 
 	<!-- Event Subsystem -->
@@ -44,15 +48,5 @@
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
-	<!-- bean name="jobSender" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass" value="com.matt.core.job.CommandJob" />
-		<property name="jobDataAsMap">
-			<map>
-				<entry key="eventForwarder">
-					<ref bean="eventCoordinator" />
-				</entry>
-			</map>
-		</property>
-	</bean-->
 
 </beans>
