@@ -12,6 +12,9 @@ public class JaxbFactory {
 	static{
 		try{
 			JAXBContext context = JAXBContext.newInstance(new Class[] {
+					// Jaxb Registry
+					com.matt.remotr.main.jaxb.JaxbRegistry.class,
+					
 					// Device classes
 					com.matt.remotr.core.argument.Argument.class,
 					com.matt.remotr.core.command.Command.class,
@@ -32,6 +35,7 @@ public class JaxbFactory {
 					
 					// Request classes
 					com.matt.remotr.ws.request.WsRequest.class,
+					com.matt.remotr.ws.request.WsRequestParameter.class,
 					
 					// Job classes
 					com.matt.remotr.core.job.JobStatus.class
