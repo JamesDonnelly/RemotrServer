@@ -1,7 +1,10 @@
 package com.matt.remotr.ws.request;
 
+import java.util.ArrayList;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.matt.remotr.ws.response.WsResponse;
@@ -12,11 +15,12 @@ public class WsRequest {
 	private Long dateTime = System.currentTimeMillis();
 	private String subSystem;
 	private String method;
+	private ArrayList<WsRequestParameter> params;
 	
 	/**
 	 * Can be set to any string and will be returned on the {@link WsResponse}
 	 */
-	private String refference;
+	private String reference;
 	
 	@XmlElement(name="SubSystem")
 	public String getSubSystem() {
@@ -33,13 +37,23 @@ public class WsRequest {
 		return dateTime;
 	}
 	
-	@XmlAttribute(name="Refference")
-	public String getRefference() {
-		return refference;
+	@XmlAttribute(name="Reference")
+	public String getReference() {
+		return reference;
 	}
 
-	public void setRefference(String refference) {
-		this.refference = refference;
+	@XmlElement(name="Param")
+	@XmlElementWrapper(name="Params")
+	public ArrayList<WsRequestParameter> getParams() {
+		return params;
+	}
+
+	public void setParams(ArrayList<WsRequestParameter> params) {
+		this.params = params;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	public void setSubSystem(String subSystem) {
