@@ -63,7 +63,7 @@ public class XmppMessageManager implements MessageListener, RosterListener {
 						try{
 							deviceCoordinator.updateDevice(device);
 						}catch(DeviceException de){
-							// Meh.
+							log.warn("Error updating device with connection type");
 						}
 						log.debug("Replaced device reference with coordinator reference okay");
 					}catch(DeviceException de){
@@ -90,36 +90,30 @@ public class XmppMessageManager implements MessageListener, RosterListener {
 			if(obj instanceof WsRequest){
 				WsRequest request = (WsRequest) obj;
 				log.info("["+device.getName()+"] request to call ["+request.getMethod()+"] on ["+request.getSubSystem()+"]");
-				
-				WsResponse response = new WsResponse();
-				response.setRefference(request.getRefference());
-				xmppCoordinator.sendMessage(device, response);
+				xmppCoordinator.handleRequest(device, request);
 			}
+
 			
 			if(obj instanceof Event){
 				Event event = (Event) obj;
 				xmppCoordinator.handleEvent(device, event);
 				
 				WsResponse response = new WsResponse();
-				response.setRefference(event.getRefference());
+				response.setReference(event.getRefference());
 				response.setSubSystem("XmppCoordinator");
 				response.setSuccess(true);
 				xmppCoordinator.sendMessage(device, response);
 			}
 			
 		} catch (JAXBException e) {
-			log.error("Error unmarshalling response from ["+chat.getParticipant()+"]");
+			String msg = "Error unmarshalling response from ["+chat.getParticipant()+"]";
+			log.error(msg);
+			sendErrorResponse(msg);
 		} catch (DeviceException de){
 			log.error("Error contacting DeviceCoordinator");
 		}
 	}
-	
-	private void shutdownAndCleanUp(){
-		log.info("Ending ["+chat.getParticipant()+"]");
-		xmppCoordinator.unregister(this);
-		running = false;
-	}
-	
+
 	class XmppSenderService extends Thread {
 		public void run(){
 			this.setName("Xmpp-"+device.getName());
@@ -174,6 +168,19 @@ public class XmppMessageManager implements MessageListener, RosterListener {
 			log.info("Device ["+device.getName()+"] is no longer available on XMPP - Closing thread");
 			shutdownAndCleanUp();
 		}
+	}
+	
+	private void sendErrorResponse(String msg) {
+		WsResponse response = new WsResponse();
+		response.setSubSystem("XmppCoordinator");
+		response.setErrorMessage(msg);
+		xmppCoordinator.sendMessage(device, response);				
+	}
+	
+	private void shutdownAndCleanUp(){
+		log.info("Ending ["+chat.getParticipant()+"]");
+		xmppCoordinator.unregister(this);
+		running = false;
 	}
 	
 	// Dont really care about these...

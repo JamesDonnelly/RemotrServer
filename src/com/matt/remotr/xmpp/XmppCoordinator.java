@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.tcpws.WsSender;
+import com.matt.remotr.ws.request.WsRequest;
 
 /**
  * Handles access to the system via XMPP Messages. 
@@ -47,5 +48,12 @@ public interface XmppCoordinator extends WsSender {
 	 * @param event
 	 */
 	public void handleEvent(Device device, Event event);
+	
+	/**
+	 * Handles an incoming {@link WsRequest} from the {@link XmppMessageManager}
+	 * @param device
+	 * @param wsRequest
+	 */
+	public void handleRequest(Device device, WsRequest wsRequest);
 
 }

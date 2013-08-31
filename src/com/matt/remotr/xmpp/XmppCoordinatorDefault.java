@@ -33,6 +33,8 @@ import com.matt.remotr.core.event.EventType;
 import com.matt.remotr.core.event.types.DeviceEvent;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.main.jaxb.JaxbFactory;
+import com.matt.remotr.ws.request.WsRequest;
+import com.matt.remotr.ws.request.WsRequestManager;
 import com.matt.remotr.ws.response.WsResponse;
 /**
  * The default implementation of the {@link XmppCoordinator}. 
@@ -51,6 +53,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	
 	private DeviceCoordinator deviceCoordinator;
 	private EventCoordinator eventCoordinator;
+	private WsRequestManager requestManager;
 	
 	protected ArrayList<XmppMessageManager> messageManagers;
 	protected Map<XmppMessageManager, Device> messageManagerDevice;
@@ -126,9 +129,18 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 		this.eventCoordinator = eventCoordinator;
 	}
 
+	public void setRequestManager(WsRequestManager requestManager) {
+		this.requestManager = requestManager;
+	}
+
 	@Override
 	public void handleEvent(Device device, Event event) {
 		eventCoordinator.forwardEvent(event, device);
+	}
+	
+	@Override
+	public void handleRequest(Device device, WsRequest wsRequest) {
+		requestManager.runRequest(wsRequest, device);		
 	}
 	
 	@Override

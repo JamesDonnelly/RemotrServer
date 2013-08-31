@@ -17,6 +17,7 @@ import com.matt.remotr.core.job.RemotrJob;
 import com.matt.remotr.tcpws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.response.WsResponseForwarder;
 
 /**
  * The default implementation of the EventCoordinator. 
@@ -25,7 +26,7 @@ import com.matt.remotr.ws.response.WsResponse;
  * @author mattm
  *
  */
-public class EventCoordinatorDefault implements EventCoordinator, JobForwarder {
+public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, WsResponseForwarder {
 	private Logger log;
 	private WsSender tcpWsSender;
 	private WsSender xmppWsSender;
@@ -195,23 +196,13 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder {
 			sendMessage(toDevice, wsResponse);	
 		}
 	}
-		
-	private WsResponse wrapEvent(Event event){
-		log.debug("Event ["+event.getName()+"] is a ["+event.getEventType().toString()+"]");
-		WsResponse wsResponse = new WsResponse();
-		wsResponse.setResponse(event);
-		wsResponse.setSubSystem("EventCoordinator");
-		wsResponse.setSuccess(true);
-
-		return wsResponse;
-	}
 
 	@Override
 	public void forwardJob(Device device, RemotrJob job) {
 		if(device !=null){
 			getDeviceFromCoordinator(device);
 			if(device != null || job != null){
-				log.info("Forwarding RemotrJob >> ["+job.getJobName()+"] via TcpWs");
+				log.info("Forwarding RemotrJob >> ["+job.getJobName()+"]");
 				// Jobs are not cached
 				WsJobResponse jobResponse = new WsJobResponse();
 				jobResponse.setCommand(job.getCommand());
@@ -228,6 +219,25 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder {
 		}else{
 			log.error("Error forwarding job");
 		}
+	}
+	
+	@Override
+	public void forwardWsResponse(Device device, WsResponse wsResponse) {
+		device = getDeviceFromCoordinator(device);
+		if(device != null){
+			log.info("Forwarding WsResponse >> ["+wsResponse.getReference()+"]");
+			sendMessage(device, wsResponse);
+		}
+	}
+	
+	private WsResponse wrapEvent(Event event){
+		log.debug("Event ["+event.getName()+"] is a ["+event.getEventType().toString()+"]");
+		WsResponse wsResponse = new WsResponse();
+		wsResponse.setResponse(event);
+		wsResponse.setSubSystem("EventCoordinator");
+		wsResponse.setSuccess(true);
+
+		return wsResponse;
 	}
 	
 	private void handleBroadcastEvent(Event event){
