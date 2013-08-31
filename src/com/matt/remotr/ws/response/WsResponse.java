@@ -35,7 +35,7 @@ public class WsResponse {
 	/**
 	 * This can be set to any string on the {@link WsRequest} and will be returned on the response
 	 */
-	private String refference;
+	private String reference;
 	/**
 	 * If not set explicitly, dateTime defaults to the time at which the response object was created
 	 */
@@ -147,13 +147,13 @@ public class WsResponse {
 		this.errorMessage = errorMessage;
 	}
 	
-	@XmlAttribute(name="Refference")
-	public String getRefference() {
-		return refference;
+	@XmlAttribute(name="Reference")
+	public String getReference() {
+		return reference;
 	}
 
-	public void setRefference(String refference) {
-		this.refference = refference;
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	// Helper functions
