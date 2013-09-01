@@ -9,13 +9,15 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.matt.remotr.core.command.Command;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.device.domain.DeviceType;
+import com.matt.remotr.core.device.jpa.DeviceJPA;
 import com.matt.remotr.core.event.EventForwarder;
-import com.matt.remotr.core.event.EventType;
 import com.matt.remotr.core.event.types.DeviceEvent;
+import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.main.hibernate.HibernateUtil;
 
-// TODO: Implement cascade deletes
 /**
  * Default implementation of the device coordinator
  * @author mattm
@@ -38,15 +40,15 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			Query queryResult = session.createQuery("from Device");   
 			List<?> tmpDevices = queryResult.list();
 			for (int i = 0; i < tmpDevices.size(); i++) {  
-				Device device = (Device) tmpDevices.get(i);
-				log.debug("Found device ["+device.getId()+"]["+device.getName()+"] in db. Restoring");
-				if(devices.addByDevice(device)){
-					log.debug("Device ["+device.getId()+"]["+device.getName()+"] restored");
-					if(device.getCommands() != null){
-						log.debug("Device ["+device.getName()+"] has ["+device.getCommands().size()+"] commands registered");
+				DeviceJPA deviceJpa = (DeviceJPA) tmpDevices.get(i);
+				log.debug("Found device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] in db. Restoring");
+				if(devices.addByJPA(deviceJpa)){
+					log.debug("Device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] restored");
+					if(deviceJpa.getCommands() != null){
+						log.debug("Device ["+deviceJpa.getName()+"] has ["+deviceJpa.getCommands().size()+"] commands registered");
 					}
 				}else{
-					log.debug("Device ["+device.getId()+"]["+device.getName()+"] failed to restore");
+					log.debug("Device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] failed to restore");
 				}
 			}
 			log.info("Finished getting persisted devices from database");
@@ -62,6 +64,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	@Override
 	public boolean register(Device device) throws DeviceException {		
 		log.info("Incoming request to register device ["+device.getName()+"]");
+		DeviceJPA deviceJPA = new DeviceJPA(device);
 		if(devices.addByDevice(device)){
 			//session = HibernateUtil.getSessionFactory().openSession();
 			Transaction transaction = null;
@@ -69,7 +72,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			try{
 				session = HibernateUtil.getSessionFactory().openSession();
 				transaction = session.beginTransaction();
-				Long deviceId = (Long) session.save(device);
+				Long deviceId = (Long) session.save(deviceJPA);
 				device.setId(deviceId);
 				if(device.getCommands() != null){
 					for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
@@ -78,6 +81,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				}
 				transaction.commit();
 				log.info("Device ["+device.getName()+"] registered");
+				
+				// Update now as we have set the correct Ids on the Device
+				updateDevice(device);
+				
 				DeviceEvent event = new DeviceEvent();
 				event.setEventType(EventType.DEVICE_REGISTER);
 				event.setName("DeviceRegistered");
@@ -109,8 +116,11 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			if(device.getName().equals("SYSTEM")){
 				throw new DeviceException("Can not remove system device ["+device.getName()+"]");
 			}
+			
+			DeviceJPA deviceJPA = new DeviceJPA(device);
+			
 			session.beginTransaction();
-			session.delete(device);
+			session.delete(deviceJPA);
 			session.getTransaction().commit();
 			devices.removeByDevice(device);
 			log.info("Device ["+device.getName()+"] deregistered");
@@ -120,6 +130,28 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			throw new DeviceException("Error removing persisted object");
 		}finally{
 			session.close();
+		}
+	}
+	
+	@Override
+	public void updateDevice(Device device) throws DeviceException {
+		if(checkDeviceRegistered(device)){
+			log.info("Updating device ["+device.getName()+"]");
+			devices.replace(device);
+			DeviceJPA deviceJPA = new DeviceJPA(device);
+			try{
+				session = HibernateUtil.getSessionFactory().openSession();
+				session.beginTransaction();
+				session.update(deviceJPA);
+				session.getTransaction().commit();
+			}catch(HibernateException he){
+				log.error("Error persisting updated device ["+device.getName()+"]");
+				throw new DeviceException("Error updating device");
+			}finally{
+				session.close();
+			}
+		}else{
+			throw new DeviceException("Device ["+device.getName()+"] is not registered with this coordinator");
 		}
 	}
 
@@ -211,27 +243,6 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		device.setLastHeatbeatTime(System.currentTimeMillis());		
 	}
 	
-	@Override
-	public void updateDevice(Device device) throws DeviceException {
-		if(checkDeviceRegistered(device)){
-			log.info("Updating device ["+device.getName()+"]");
-			devices.replace(device);
-			try{
-				session = HibernateUtil.getSessionFactory().openSession();
-				session.beginTransaction();
-				session.update(device);
-				session.getTransaction().commit();
-			}catch(HibernateException he){
-				log.error("Error persisting updated device ["+device.getName()+"]");
-				throw new DeviceException("Error updating device");
-			}finally{
-				session.close();
-			}
-		}else{
-			throw new DeviceException("Device ["+device.getName()+"] is not registered with this coordinator");
-		}
-	}
-	
 	private void triggerRecache(){
 		log.info("Device Coordinator recache triggered: Attempting to get persisted devices from database");
 		try{
@@ -240,13 +251,13 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			List<?> tmpDevices = queryResult.list();
 			devices.removeAll();
 			for (int i = 0; i < tmpDevices.size(); i++) {  
-				Device device = (Device) tmpDevices.get(i);
-				log.debug("Found device ["+device.getId()+"]["+device.getName()+"] in db. Restoring");
-				if(devices.addByDevice(device)){
-					log.debug("Device ["+device.getId()+"]["+device.getName()+"] restored");
-					log.debug("Device ["+device.getName()+"] has ["+device.getCommands().size()+"] commands registered");
+				DeviceJPA deviceJpa = (DeviceJPA) tmpDevices.get(i);
+				log.debug("Found device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] in db. Restoring");
+				if(devices.addByJPA(deviceJpa)){
+					log.debug("Device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] restored");
+					log.debug("Device ["+deviceJpa.getName()+"] has ["+deviceJpa.getCommands().size()+"] commands registered");
 				}else{
-					log.debug("Device ["+device.getId()+"]["+device.getName()+"] failed to restore");
+					log.debug("Device ["+deviceJpa.getId()+"]["+deviceJpa.getName()+"] failed to restore");
 				}
 			}
 			log.info("Finished getting persisted devices from database");
@@ -268,5 +279,4 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	public void setEventForwarder(EventForwarder eventForwarder) {
 		this.eventForwarder = eventForwarder;
 	}
-	
 }
