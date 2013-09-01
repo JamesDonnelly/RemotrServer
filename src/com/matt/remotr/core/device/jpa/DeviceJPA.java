@@ -36,6 +36,8 @@ public class DeviceJPA implements Serializable {
 	private boolean hasHeartbeat = false;
 	private ArrayList<CommandJPA> commands;
 	
+	public DeviceJPA() {}
+	
 	public DeviceJPA(Device device){
 		this.deviceId = device.getId();
 		this.name = device.getName();

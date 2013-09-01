@@ -31,6 +31,8 @@ public class CommandJPA implements Serializable {
 	private ArrayList<ArgumentJPA> arguments;
 	private static final long serialVersionUID = 1L;
 	
+	public CommandJPA() {}
+	
 	public CommandJPA(Command command){
 		this.commandId = command.getId();
 		this.deviceId = command.getDeviceId();

@@ -21,6 +21,8 @@ public class ArgumentJPA implements Serializable {
 	private String value;
 	private static final long serialVersionUID = 1L;
 	
+	public ArgumentJPA(){}
+	
 	public ArgumentJPA(Argument argument){
 		this.id = argument.getId();
 		this.commandId = argument.getCommandId();
