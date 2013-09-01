@@ -15,6 +15,7 @@ import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.core.job.JobForwarder;
 import com.matt.remotr.core.job.RemotrJob;
+import com.matt.remotr.main.Main;
 import com.matt.remotr.tcpws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponseForwarder;
@@ -227,6 +228,9 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 		device = getDeviceFromCoordinator(device);
 		if(device != null){
 			log.info("Forwarding WsResponse >> ["+wsResponse.getReference()+"]");
+			// Override the version info on the response...
+			wsResponse.setVersionName(Main.getVersionName());
+			wsResponse.setVersionNum(Main.getVersionNumber());
 			sendMessage(device, wsResponse);
 		}
 	}

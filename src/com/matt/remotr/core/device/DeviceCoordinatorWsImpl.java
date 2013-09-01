@@ -9,6 +9,7 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
+import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.DeviceCoordinatorWs;
 import com.matt.remotr.ws.request.WsRequestManager;
 import com.matt.remotr.ws.response.domain.WsDeviceResponse;
@@ -34,8 +35,7 @@ public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport impleme
 
 	@Override 
 	public WsDeviceResponse register(Device device) {
-		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
-		wsDeviceResponse.setSubSystem(getSubSystemName());
+		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		try {
 			wsDeviceResponse.setSuccess(deviceCoordinator.register(device));
 		} catch (DeviceException e) {
@@ -48,8 +48,7 @@ public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport impleme
 
 	@Override
 	public WsDeviceResponse deregister(Device device) {
-		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
-		wsDeviceResponse.setSubSystem(getSubSystemName());
+		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		try {
 			wsDeviceResponse.setSuccess(deviceCoordinator.deregister(device));
 		} catch (DeviceException e) {
@@ -62,8 +61,7 @@ public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport impleme
 
 	@Override
 	public WsDeviceResponse checkRegistered(String name, DeviceType type) {
-		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
-		wsDeviceResponse.setSubSystem(getSubSystemName());
+		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		wsDeviceResponse.setSuccess(deviceCoordinator.checkRegistered(name, type));
 		
 		return wsDeviceResponse;
@@ -71,8 +69,7 @@ public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport impleme
 
 	@Override
 	public WsDeviceResponse getDeviceById(int id) {
-		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
-		wsDeviceResponse.setSubSystem(getSubSystemName());
+		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		try {
 			wsDeviceResponse.setDeviceResponse((deviceCoordinator.getDeviceByPos(id)));
 			wsDeviceResponse.setSuccess(true);
@@ -86,10 +83,18 @@ public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport impleme
 
 	@Override
 	public WsDeviceResponse getAllRegisteredDevices() {
-		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
-		wsDeviceResponse.setSubSystem(getSubSystemName());
+		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		wsDeviceResponse.setDeviceListResponse(deviceCoordinator.getAllRegisteredDevices());
 		wsDeviceResponse.setSuccess(true);
+		
+		return wsDeviceResponse;
+	}
+	
+	private WsDeviceResponse getDeviceResponseForClass(){
+		WsDeviceResponse wsDeviceResponse = new WsDeviceResponse();
+		wsDeviceResponse.setSubSystem(getSubSystemName());
+		wsDeviceResponse.setVersionName(Main.getVersionName());
+		wsDeviceResponse.setVersionNum(Main.getVersionNumber());
 		
 		return wsDeviceResponse;
 	}

@@ -12,6 +12,7 @@ import com.matt.remotr.core.device.DeviceException;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
+import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.EventCoordinatorWs;
 import com.matt.remotr.ws.request.WsRequestManager;
 import com.matt.remotr.ws.response.domain.WsResponse;
@@ -91,6 +92,8 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	private WsResponse getWsResponseForClass(){
 		WsResponse wsResponse = new WsResponse();
 		wsResponse.setSubSystem(getSubSystemName());
+		wsResponse.setVersionName(Main.getVersionName());
+		wsResponse.setVersionNum(Main.getVersionNumber());
 		return wsResponse;
 	}
 
