@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <project name="Remotr Server" default="tidy-war" basedir=".">
+    
 	<!-- PROPERTIES -->
 	<property name="sourceDir" location="./src" />
 	<property name="buildDir" location="./build" />
@@ -13,7 +14,14 @@
 	<property name="imageFiles" value="**/*.gif,**/*.png,**/*.jpg" />
 	<property name="debug" value="true" />
 	<property name="deployDir" value="/usr/local/jboss/standalone/deployments" />
-
+	
+	<!-- RemotrUtil proerties -->
+	<property name="ru.dir" location="../RemotrUtil" />
+	<property name="ru.bin.dir" location="${ru.dir}/build/bin/" />
+	<property name="ru.build.dir" location="${ru.dir}/build/" />
+	<property name="ru.src.dir" location="${ru.dir}/src/" />
+	<property name="ru.jar.dir" location="${ru.dir}/dist/" />
+	
 	<!-- libs -->
 	<property name="hibernate.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\required" />
 	<property name="hibernatejpa.lib" value="C:\java\hibernate-release-4.2.2.Final\lib\jpa" />
@@ -28,6 +36,9 @@
 	<property file="${sourceDir}/version.properties" />
 
 	<path id="compile-classpath">
+	    <fileset dir="${ru.build.dir}">
+			<include name="**/*.class" />
+		</fileset>
 		<fileset dir="${hibernate.lib}">
 			<include name="*.jar" />
 		</fileset>
@@ -117,7 +128,7 @@
 
 	<target name="compile" depends="build">
 		<echo message="Building source" />
-		<javac srcdir="${sourceDir}" destdir="${binDir}" debug="true"
+		<javac srcdir="${sourceDir};${ru.src.dir}" destdir="${binDir}" debug="true"
 			debuglevel="lines,vars,source" source="1.6" target="1.6" encoding="UTF-8"
 			includeantruntime="true">
 			<classpath refid="compile-classpath" />
