@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -21,12 +21,13 @@ import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
 
 @Entity
+@Table(name="DeviceJPA")
 public class DeviceJPA implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue
 	private Long deviceId;
 	private String name;
 	private DeviceType type;

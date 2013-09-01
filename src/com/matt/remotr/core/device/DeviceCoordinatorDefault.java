@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.ConnectionType;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
 import com.matt.remotr.core.device.jpa.DeviceJPA;
@@ -37,7 +38,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			// On startup, get any persisted device objects from the db
 			log.info("Attempting to get persisted devices from database");
 			session = HibernateUtil.getSessionFactory().openSession();
-			Query queryResult = session.createQuery("from Device");   
+			Query queryResult = session.createQuery("from DeviceJPA");   
 			List<?> tmpDevices = queryResult.list();
 			for (int i = 0; i < tmpDevices.size(); i++) {  
 				DeviceJPA deviceJpa = (DeviceJPA) tmpDevices.get(i);
@@ -59,6 +60,17 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		}finally{
 			session.close();
 		}
+		
+		// Register the SYSTEM device
+		Device d = new Device();
+		d.setName("SYSTEM");
+		d.setType(DeviceType.SYSTEM);
+		d.setConnectionType(ConnectionType.NONE);
+		try {
+			register(d);
+		} catch (DeviceException e) {
+			log.warn("Unable to register system device");
+		}
 	}
 
 	@Override
@@ -66,7 +78,6 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		log.info("Incoming request to register device ["+device.getName()+"]");
 		DeviceJPA deviceJPA = new DeviceJPA(device);
 		if(devices.addByDevice(device)){
-			//session = HibernateUtil.getSessionFactory().openSession();
 			Transaction transaction = null;
 			
 			try{
@@ -96,7 +107,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				log.error("Error persisting Device ["+device.getName()+"]", he);
 				throw new DeviceException("Error persisting Device ["+device.getName()+"]");
 			}finally{
-				session.close();
+				if(session.isOpen()) session.close(); // Check first as it may be closed after calling updateDevice()
 			}
 		}else{
 			String message = "Device ["+device.getName()+"] is already registered";
@@ -247,7 +258,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		log.info("Device Coordinator recache triggered: Attempting to get persisted devices from database");
 		try{
 			session = HibernateUtil.getSessionFactory().openSession();
-			Query queryResult = session.createQuery("from Device");   
+			Query queryResult = session.createQuery("from DeviceJPA");   
 			List<?> tmpDevices = queryResult.list();
 			devices.removeAll();
 			for (int i = 0; i < tmpDevices.size(); i++) {  

@@ -7,9 +7,9 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
-import com.matt.remotr.core.argument.domain.Argument;
-import com.matt.remotr.core.command.domain.Command;
-import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.argument.jpa.ArgumentJPA;
+import com.matt.remotr.core.command.jpa.CommandJPA;
+import com.matt.remotr.core.device.jpa.DeviceJPA;
 
 @SuppressWarnings("rawtypes")
 public class HibernateUtil {
@@ -19,9 +19,9 @@ public class HibernateUtil {
 	
 	static {
 		try {
-			annotatedClassList.add(Device.class);
-			annotatedClassList.add(Command.class);
-			annotatedClassList.add(Argument.class);
+			annotatedClassList.add(DeviceJPA.class);
+			annotatedClassList.add(CommandJPA.class);
+			annotatedClassList.add(ArgumentJPA.class);
 			
 			Configuration configuration = new Configuration();
 			configuration.configure();

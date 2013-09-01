@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
@@ -19,10 +19,11 @@ import com.matt.remotr.core.argument.jpa.ArgumentJPA;
 import com.matt.remotr.core.command.domain.Command;
 
 @Entity
+@Table(name="CommandJPA")
 public class CommandJPA implements Serializable {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue
 	private Long commandId;
 	private Long deviceId;
 	private String name;
