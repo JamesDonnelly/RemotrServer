@@ -16,7 +16,7 @@
 	<property name="deployDir" value="/usr/local/jboss/standalone/deployments"/>
 	
 	<!-- RemotrUtil proerties -->
-	<property name="ru.dir" location="../RemotrUtil" />
+	<property name="ru.dir" location="../Remotr Utils - Master" />
 	<property name="ru.bin.dir" location="${ru.dir}/build/bin/" />
 	<property name="ru.build.dir" location="${ru.dir}/build/" />
 	<property name="ru.src.dir" location="${ru.dir}/src/" />
