@@ -1,7 +1,8 @@
 package com.matt.remotr.ws.request;
 
-import com.matt.remotr.core.device.ConnectionType;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.device.domain.ConnectionType;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.ws.request.domain.WsRequest;
 
 public interface WsRequestManager {
 	

@@ -2,9 +2,10 @@ package com.matt.remotr.core.command;
 
 import java.util.ArrayList;
 
-import com.matt.remotr.core.argument.Argument;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.argument.domain.Argument;
+import com.matt.remotr.core.command.domain.Command;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.Device;
 
 /**
  * Interface for classes wanting to manage the commands on devices. 

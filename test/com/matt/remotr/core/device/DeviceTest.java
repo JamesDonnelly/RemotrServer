@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.device.domain.DeviceType;
+
 public class DeviceTest {
 	private Device device;
 

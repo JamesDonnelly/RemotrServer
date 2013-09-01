@@ -12,10 +12,12 @@ import javax.xml.bind.JAXBElement;
 import org.apache.log4j.Logger;
 import org.springframework.core.annotation.AnnotationUtils;
 
-import com.matt.remotr.core.device.Device;
-import com.matt.remotr.ws.response.WsDeviceResponse;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.ws.request.domain.WsRequest;
+import com.matt.remotr.ws.request.domain.WsRequestParameter;
 import com.matt.remotr.ws.response.WsResponseForwarder;
+import com.matt.remotr.ws.response.domain.WsDeviceResponse;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 public class WsRequestManagerDefault implements WsRequestManager, WsRequestRunner{
 	private Logger log;

@@ -6,18 +6,19 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.matt.remotr.core.device.ConnectionType;
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceCoordinatorDefault;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.ConnectionType;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.core.job.JobForwarder;
 import com.matt.remotr.core.job.RemotrJob;
 import com.matt.remotr.tcpws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
-import com.matt.remotr.ws.response.WsResponse;
 import com.matt.remotr.ws.response.WsResponseForwarder;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 /**
  * The default implementation of the EventCoordinator. 

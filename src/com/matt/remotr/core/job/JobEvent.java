@@ -1,4 +1,4 @@
-package com.matt.remotr.ws.response;
+package com.matt.remotr.core.job;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -6,11 +6,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.quartz.JobKey;
 
 import com.matt.remotr.core.command.domain.Command;
-import com.matt.remotr.core.job.JobStatus;
-import com.matt.remotr.ws.response.domain.WsResponse;
+import com.matt.remotr.core.event.types.Event;
 
+// TODO: Make this event not contain Quartz class references so this can be refactored over to util
 @XmlRootElement
-public class WsJobResponse extends WsResponse {
+public class JobEvent extends Event {
 	
 	private int jobId;
 	private String jobName;

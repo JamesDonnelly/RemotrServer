@@ -1,6 +1,6 @@
 package com.matt.remotr.core.job;
 
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.device.domain.Device;
 
 /**
  * Allows implementing classes to forward jobs to devices

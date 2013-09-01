@@ -6,7 +6,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-import com.matt.remotr.core.command.Command;
+import com.matt.remotr.core.argument.domain.Argument;
+import com.matt.remotr.core.argument.jpa.ArgumentJPA;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.command.jpa.CommandJPA;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.device.domain.DeviceType;
+import com.matt.remotr.core.device.jpa.DeviceJPA;
 
 @XmlType(name="DeviceList")
 class DeviceList {
@@ -22,6 +28,55 @@ class DeviceList {
 		}else{
 			return false;
 		}
+	}
+	
+	public boolean addByJPA(DeviceJPA deviceJpa){
+		Device device = new Device();
+		device.setId(deviceJpa.getId());
+		device.setName(deviceJpa.getName());
+		device.setType(deviceJpa.getType());
+		device.setConnectionType(deviceJpa.getConnectionType());
+		device.setHasHeartbeat(deviceJpa.isHadHeartbeat());
+		device.setLastHeatbeatTime(deviceJpa.getLastHeartbeatTime());
+		
+		// Convert from JPA to Domain for all types here
+		if(deviceJpa.getCommands() != null){
+			ArrayList<Command> cList = new ArrayList<Command>();
+			for(CommandJPA cJpa : deviceJpa.getCommands()){
+				cList.add(jpaToDomain(cJpa));
+			}
+			device.setCommands(cList);
+		}
+		
+		return addByDevice(device);
+	}
+	
+	private Command jpaToDomain(CommandJPA jpa){
+		Command c = new Command();
+		c.setId(jpa.getId());
+		c.setDeviceId(jpa.getDeviceId());
+		c.setName(jpa.getName());
+		c.setTrigger(jpa.getTrigger());
+		
+		if(jpa.getArguments() != null){
+			ArrayList<Argument> aList = new ArrayList<Argument>();
+			for(ArgumentJPA aJpa : jpa.getArguments()){
+				aList.add(jpaToDomain(aJpa));
+			}
+			c.setArguments(aList);
+		}
+		
+		return c;
+	}
+	
+	private Argument jpaToDomain(ArgumentJPA jpa){
+		Argument a = new Argument();
+		a.setId(jpa.getId());
+		a.setCommandId(jpa.getCommandId());
+		a.setType(jpa.getType());
+		a.setValue(jpa.getValue());
+		
+		return a;
 	}
 
 	public boolean addByTypes(String name, DeviceType type){

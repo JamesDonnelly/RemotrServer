@@ -1,7 +1,8 @@
 package com.matt.remotr.core.event;
 
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.EventType;
 
 /**
  * Interface for classes wishing to have the ability to forward events around the system

@@ -24,6 +24,7 @@
 		<property name="maxConnections" value="10" />
 	</bean>
 	
+	<!-- Request Managers -->
 	<bean id="wsRequestManager" class="com.matt.remotr.ws.request.WsRequestManagerDefault">
 	    <property name="responseForwarder" ref="eventCoordinator"/>
 	</bean>
@@ -48,5 +49,6 @@
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
+	<bean id="jobCoordinatorWs" class="com.matt.remotr.core.job.JobCoordinatorWsImpl" autowire="default" />
 
 </beans>

@@ -1,7 +1,6 @@
 package com.matt.remotr.core.job;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
+import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 
 import org.apache.log4j.Logger;
@@ -9,9 +8,10 @@ import org.quartz.JobDataMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.matt.remotr.core.command.Command;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.ws.JobCoordinatorWs;
+import com.matt.remotr.ws.request.WsRequestManager;
 import com.matt.remotr.ws.response.WsJobResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl", endpointInterface="com.matt.remotr.ws.JobCoordinatorWs", serviceName="job")
@@ -20,10 +20,17 @@ public class JobCoordinatorWsImpl extends SpringBeanAutowiringSupport implements
 	private Logger log;
 	@Autowired
 	private JobCoordinator jobCoordinator;
+	@Autowired
+	private WsRequestManager requestManager;
 	
 	public JobCoordinatorWsImpl(){
 		log = Logger.getLogger(this.getClass());
 		log.debug("Starting new JobCoordinator WebService");
+	}
+	
+	@PostConstruct
+	public void init(){
+		requestManager.register(this);
 	}
 
 	@Override
@@ -98,8 +105,13 @@ public class JobCoordinatorWsImpl extends SpringBeanAutowiringSupport implements
 	
 	private WsJobResponse getWsJobResponseForClass(){
 		WsJobResponse jobResponse = new WsJobResponse();
-		jobResponse.setSubSystem("JobCoordinator");
+		jobResponse.setSubSystem(getSubSystemName());
 		return jobResponse;
+	}
+
+	@Override
+	public String getSubSystemName() {
+		return "JobCoordinator";
 	}
 	
 }

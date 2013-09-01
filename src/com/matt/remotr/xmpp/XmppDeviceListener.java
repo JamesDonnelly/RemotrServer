@@ -21,7 +21,7 @@ public class XmppDeviceListener implements ChatManagerListener {
 	public void chatCreated(Chat chat, boolean createdLocally) {
 		if(!createdLocally){
 			log.debug("Creating new MessageManager for ["+chat.getParticipant()+"]");
-			chat.addMessageListener(new XmppMessageManager(xmppCoordinator, deviceCoordinator));
+			chat.addMessageListener(new XmppMessageServer(xmppCoordinator, deviceCoordinator));
 		}
 	}
 

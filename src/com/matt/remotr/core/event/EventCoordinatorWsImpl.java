@@ -1,17 +1,20 @@
 package com.matt.remotr.core.event;
 
+import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.ws.EventCoordinatorWs;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.request.WsRequestManager;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl", endpointInterface="com.matt.remotr.ws.EventCoordinatorWs", serviceName="event")
 public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implements EventCoordinatorWs {
@@ -21,10 +24,17 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	private EventCoordinator eventCoordinator;
 	@Autowired
 	private DeviceCoordinator deviceCoordinator;
+	@Autowired
+	private WsRequestManager requestManager;
 	
 	public EventCoordinatorWsImpl(){
 		log = Logger.getLogger(this.getClass());
 		log.debug("Starting new EventCoordinator WebService");
+	}
+	
+	@PostConstruct
+	public void init(){
+		requestManager.register(this);
 	}
 
 	@Override
@@ -80,8 +90,13 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	
 	private WsResponse getWsResponseForClass(){
 		WsResponse wsResponse = new WsResponse();
-		wsResponse.setSubSystem("EventCoordinator");
+		wsResponse.setSubSystem(getSubSystemName());
 		return wsResponse;
+	}
+
+	@Override
+	public String getSubSystemName() {
+		return "EventCoordinator";
 	}
 	
 }

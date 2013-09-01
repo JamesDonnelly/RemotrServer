@@ -23,19 +23,19 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 
-import com.matt.remotr.core.device.ConnectionType;
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.ConnectionType;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.EventCoordinator;
 import com.matt.remotr.core.event.EventReceiver;
-import com.matt.remotr.core.event.EventType;
 import com.matt.remotr.core.event.types.DeviceEvent;
 import com.matt.remotr.core.event.types.Event;
+import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.main.jaxb.JaxbFactory;
-import com.matt.remotr.ws.request.WsRequest;
 import com.matt.remotr.ws.request.WsRequestManager;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.request.domain.WsRequest;
+import com.matt.remotr.ws.response.domain.WsResponse;
 /**
  * The default implementation of the {@link XmppCoordinator}. 
  * This is a little different from the TcpWs. XMPP supports the WsRequest class that can be used to call the SOAP service, it also supports 'offline' messages. 
@@ -55,18 +55,18 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	private EventCoordinator eventCoordinator;
 	private WsRequestManager requestManager;
 	
-	protected ArrayList<XmppMessageManager> messageManagers;
-	protected Map<XmppMessageManager, Device> messageManagerDevice;
-	protected Map<XmppMessageManager, BlockingQueue<String>> messageManagerQueue;
+	protected ArrayList<XmppMessageServer> messageManagers;
+	protected Map<XmppMessageServer, Device> messageManagerDevice;
+	protected Map<XmppMessageServer, BlockingQueue<String>> messageManagerQueue;
 
 	public XmppCoordinatorDefault(String xmppServerAddress, DeviceCoordinator deviceCoordinator){
 		log = Logger.getLogger(this.getClass());
 		log.info("Starting XMPP Connection");
 		this.deviceCoordinator = deviceCoordinator; 
 		
-		messageManagers = new ArrayList<XmppMessageManager>();
-		messageManagerDevice = new HashMap<XmppMessageManager, Device>();
-		messageManagerQueue = new HashMap<XmppMessageManager, BlockingQueue<String>>();
+		messageManagers = new ArrayList<XmppMessageServer>();
+		messageManagerDevice = new HashMap<XmppMessageServer, Device>();
+		messageManagerQueue = new HashMap<XmppMessageServer, BlockingQueue<String>>();
 		
 		ConnectionConfiguration config = new ConnectionConfiguration(xmppServerAddress);
 		config.setSendPresence(true);
@@ -167,7 +167,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 				if(messageManagerDevice.containsValue(device)){
 					StringWriter sw = new StringWriter();
 					marshaller.marshal(wsResponse, sw);
-					XmppMessageManager manager = getMessageManagerForDevice(device);
+					XmppMessageServer manager = getMessageManagerForDevice(device);
 					if(manager != null){
 						synchronized (messageManagerQueue) {
 							BlockingQueue<String> queue = messageManagerQueue.get(manager);
@@ -179,7 +179,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 					log.warn("No messageManager found for device ["+device.getName()+"]");
 					if(wsResponse.getResponse() instanceof Event && roster.contains(device.getName())){
 						log.warn("Attempting to send offline event to ["+device.getName()+"]");
-						Chat chat = chatManager.createChat(device.getName(), new XmppMessageManager(this, deviceCoordinator));
+						Chat chat = chatManager.createChat(device.getName(), new XmppMessageServer(this, deviceCoordinator));
 						
 						StringWriter sw = new StringWriter();
 						marshaller.marshal(wsResponse, sw);
@@ -202,7 +202,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	}
 
 	@Override
-	public BlockingQueue<String> register(XmppMessageManager messageManager, Device device) {
+	public BlockingQueue<String> register(XmppMessageServer messageManager, Device device) {
 		synchronized (messageManagerDevice) {
 			if(!messageManagerDevice.containsKey(messageManager)){
 				messageManagerDevice.put(messageManager, device);
@@ -229,7 +229,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 
 	@SuppressWarnings("static-access")
 	@Override
-	public void unregister(XmppMessageManager messageManager) {
+	public void unregister(XmppMessageServer messageManager) {
 		synchronized (messageManagerDevice) {
 			if(messageManagerDevice.containsKey(messageManager)){
 				log.debug("Unregistering messageManager ["+messageManager.toString()+"] from XmppCoordinator");
@@ -262,9 +262,9 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 		sendMessage(device, wsResponse);
 	}
 	
-	private XmppMessageManager getMessageManagerForDevice(Device device){
+	private XmppMessageServer getMessageManagerForDevice(Device device){
 		synchronized (messageManagerDevice) {
-			for(Entry<XmppMessageManager, Device> entry : messageManagerDevice.entrySet()){
+			for(Entry<XmppMessageServer, Device> entry : messageManagerDevice.entrySet()){
 				if(device.equals(entry.getValue())){
 					return entry.getKey();
 				}
@@ -288,7 +288,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 			
 			try {
 				device = deviceCoordinator.getDevice(device);
-				XmppMessageManager manager = getMessageManagerForDevice(device);
+				XmppMessageServer manager = getMessageManagerForDevice(device);
 				if(manager != null){
 					synchronized (messageManagerQueue) {
 						BlockingQueue<String> queue = messageManagerQueue.get(manager);

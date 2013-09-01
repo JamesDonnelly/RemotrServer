@@ -4,12 +4,13 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import com.matt.remotr.core.command.Command;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.ws.request.WsRequestRunner;
 import com.matt.remotr.ws.response.WsJobResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl")
-public interface JobCoordinatorWs {
+public interface JobCoordinatorWs extends WsRequestRunner {
 	
 	@WebMethod(operationName="CreateJob")
 	public WsJobResponse createJob(@WebParam(name="Command") Command command);

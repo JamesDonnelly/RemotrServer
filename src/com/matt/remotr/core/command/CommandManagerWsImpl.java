@@ -6,10 +6,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.ws.CommandManagerWs;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl", endpointInterface="com.matt.remotr.ws.CommandManagerWs", serviceName="command")
 public class CommandManagerWsImpl extends SpringBeanAutowiringSupport implements CommandManagerWs {

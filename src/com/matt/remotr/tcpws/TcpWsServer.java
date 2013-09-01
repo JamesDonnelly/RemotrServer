@@ -14,15 +14,15 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
-import com.matt.remotr.core.device.ConnectionType;
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.ConnectionType;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.EventForwarder;
 import com.matt.remotr.core.event.types.Event;
-import com.matt.remotr.core.event.types.JobEvent;
+import com.matt.remotr.core.job.JobEvent;
 import com.matt.remotr.main.jaxb.JaxbFactory;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 // TODO: Remove calls to heartbeat update methods and use updateDevice
 public class TcpWsServer extends Thread {

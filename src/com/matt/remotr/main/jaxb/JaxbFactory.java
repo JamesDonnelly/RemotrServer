@@ -16,26 +16,26 @@ public class JaxbFactory {
 					com.matt.remotr.main.jaxb.JaxbRegistry.class,
 					
 					// Device classes
-					com.matt.remotr.core.argument.Argument.class,
-					com.matt.remotr.core.command.Command.class,
-					com.matt.remotr.core.device.DeviceType.class,
-					com.matt.remotr.core.device.ConnectionType.class,
-					com.matt.remotr.core.device.Device.class,
+					com.matt.remotr.core.argument.domain.Argument.class,
+					com.matt.remotr.core.command.domain.Command.class,
+					com.matt.remotr.core.device.domain.DeviceType.class,
+					com.matt.remotr.core.device.domain.ConnectionType.class,
+					com.matt.remotr.core.device.domain.Device.class,
 					
 					// Event classes
-					com.matt.remotr.core.event.EventType.class,
+					com.matt.remotr.core.event.types.EventType.class,
 					com.matt.remotr.core.event.types.Event.class,
-					com.matt.remotr.core.event.types.JobEvent.class,
+					com.matt.remotr.core.job.JobEvent.class,
 					com.matt.remotr.core.event.types.DeviceEvent.class,
 					
 					// Response classes
-					com.matt.remotr.ws.response.WsResponse.class,
-					com.matt.remotr.ws.response.WsDeviceResponse.class,
+					com.matt.remotr.ws.response.domain.WsResponse.class,
+					com.matt.remotr.ws.response.domain.WsDeviceResponse.class,
 					com.matt.remotr.ws.response.WsJobResponse.class,
 					
 					// Request classes
-					com.matt.remotr.ws.request.WsRequest.class,
-					com.matt.remotr.ws.request.WsRequestParameter.class,
+					com.matt.remotr.ws.request.domain.WsRequest.class,
+					com.matt.remotr.ws.request.domain.WsRequestParameter.class,
 					
 					// Job classes
 					com.matt.remotr.core.job.JobStatus.class

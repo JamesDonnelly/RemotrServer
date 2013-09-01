@@ -7,9 +7,9 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
-import com.matt.remotr.core.argument.Argument;
-import com.matt.remotr.core.command.Command;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.argument.domain.Argument;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.Device;
 
 @SuppressWarnings("rawtypes")
 public class HibernateUtil {

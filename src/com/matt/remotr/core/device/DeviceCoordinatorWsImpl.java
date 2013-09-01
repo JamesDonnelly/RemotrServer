@@ -7,9 +7,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.device.domain.DeviceType;
 import com.matt.remotr.ws.DeviceCoordinatorWs;
 import com.matt.remotr.ws.request.WsRequestManager;
-import com.matt.remotr.ws.response.WsDeviceResponse;
+import com.matt.remotr.ws.response.domain.WsDeviceResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl", endpointInterface="com.matt.remotr.ws.DeviceCoordinatorWs", serviceName="device")
 public class DeviceCoordinatorWsImpl extends SpringBeanAutowiringSupport implements DeviceCoordinatorWs {

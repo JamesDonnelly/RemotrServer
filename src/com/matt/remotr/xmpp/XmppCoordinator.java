@@ -2,10 +2,10 @@ package com.matt.remotr.xmpp;
 
 import java.util.concurrent.BlockingQueue;
 
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.tcpws.WsSender;
-import com.matt.remotr.ws.request.WsRequest;
+import com.matt.remotr.ws.request.domain.WsRequest;
 
 /**
  * Handles access to the system via XMPP Messages. 
@@ -16,19 +16,19 @@ import com.matt.remotr.ws.request.WsRequest;
 public interface XmppCoordinator extends WsSender {
 	
 	/**
-	 * Register a {@link XmppMessageManager} with the {@link XmppCoordinator} for a specific device
+	 * Register a {@link XmppMessageServer} with the {@link XmppCoordinator} for a specific device
 	 * If the registration is successful, then a queue is returned for that server to use.
 	 * @param server
 	 * @param device
 	 * @return BlockingQueue
 	 */
-	public BlockingQueue<String> register(XmppMessageManager messageManager, Device device);
+	public BlockingQueue<String> register(XmppMessageServer messageManager, Device device);
 	
 	/**
-	 * Unregister a {@link XmppMessageManager} from the coordinator
+	 * Unregister a {@link XmppMessageServer} from the coordinator
 	 * @param server
 	 */
-	public void unregister(XmppMessageManager messageManager);
+	public void unregister(XmppMessageServer messageManager);
 		
 	/**
 	 * Send a ping message to a device. It is up to the calling class to listen to the response
@@ -43,14 +43,14 @@ public interface XmppCoordinator extends WsSender {
 	public void sayHello(Device device);
 	
 	/**
-	 * Handles an incoming event received from the {@link XmppMessageManager}
+	 * Handles an incoming event received from the {@link XmppMessageServer}
 	 * @param device
 	 * @param event
 	 */
 	public void handleEvent(Device device, Event event);
 	
 	/**
-	 * Handles an incoming {@link WsRequest} from the {@link XmppMessageManager}
+	 * Handles an incoming {@link WsRequest} from the {@link XmppMessageServer}
 	 * @param device
 	 * @param wsRequest
 	 */

@@ -2,8 +2,8 @@ package com.matt.remotr.core.job;
 
 import org.quartz.JobDataMap;
 
-import com.matt.remotr.core.command.Command;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.device.domain.Device;
 
 public interface JobCoordinator {
 	

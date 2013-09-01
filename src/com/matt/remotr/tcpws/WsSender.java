@@ -1,7 +1,7 @@
 package com.matt.remotr.tcpws;
 
-import com.matt.remotr.core.device.Device;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 public interface WsSender {
 	

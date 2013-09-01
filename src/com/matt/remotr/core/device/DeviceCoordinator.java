@@ -2,6 +2,9 @@ package com.matt.remotr.core.device;
 
 import java.util.ArrayList;
 
+import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.device.domain.DeviceType;
+
 public interface DeviceCoordinator {
 	
 	public boolean register(Device device) throws DeviceException;

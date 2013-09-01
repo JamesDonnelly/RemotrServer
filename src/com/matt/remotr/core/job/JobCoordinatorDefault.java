@@ -23,15 +23,14 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.matt.remotr.core.command.Command;
-import com.matt.remotr.core.device.Device;
+import com.matt.remotr.core.command.domain.Command;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceException;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.EventCoordinator;
 import com.matt.remotr.core.event.EventReceiver;
-import com.matt.remotr.core.event.EventType;
 import com.matt.remotr.core.event.types.Event;
-import com.matt.remotr.core.event.types.JobEvent;
+import com.matt.remotr.core.event.types.EventType;
 
 /**
  * The default implementation of the {@link JobCoordinator}. This is responsible for creating and executing jobs, and creating JOB {@link EventType} to notify 
@@ -40,7 +39,7 @@ import com.matt.remotr.core.event.types.JobEvent;
  *
  */
 
-//TODO: Implement job listeners
+// TODO: Make job framework better - Clean up this code!
 //TODO: Make jobs and their status persistent
 public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, JobListener {
 	

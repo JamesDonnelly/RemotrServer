@@ -16,12 +16,12 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.log4j.Logger;
 
-import com.matt.remotr.core.device.Device;
 import com.matt.remotr.core.device.DeviceCoordinator;
 import com.matt.remotr.core.device.DeviceCoordinatorDefault;
+import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.EventForwarder;
 import com.matt.remotr.main.jaxb.JaxbFactory;
-import com.matt.remotr.ws.response.WsResponse;
+import com.matt.remotr.ws.response.domain.WsResponse;
 
 public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator {
 	
