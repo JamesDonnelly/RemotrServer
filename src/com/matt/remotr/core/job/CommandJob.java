@@ -1,6 +1,6 @@
 package com.matt.remotr.core.job;
 
-import org.jboss.logging.Logger;
+import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
