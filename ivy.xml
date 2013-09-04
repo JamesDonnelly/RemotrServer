@@ -1,0 +1,31 @@
+<ivy-module version="2.0">
+    <info organisation="com.matt" module="RemotrSerevr-Ivy"/>
+    <dependencies>
+    	<!-- Junit and testing -->
+        <dependency org="junit" name="junit" rev="4.11"/>
+        
+        <!-- Logging -->
+        <dependency org="log4j" name="log4j" rev="1.2.17"/>
+        
+        <!-- Job Scheduling -->
+        <dependency org="org.quartz-scheduler" name="quartz" rev="2.2.0"/>
+        
+        <!-- Servlet -->
+        <dependency org="org.apache.tomcat" name="servlet-api" rev="6.0.37"/>
+        
+        <!-- Smack XMPP -->
+        <dependency org="org.igniterealtime.smack" name="smack" rev="3.2.1"/>
+        <dependency org="org.igniterealtime.smack" name="smackx" rev="3.2.1"/>
+        
+        <!-- Hibernate -->
+        <dependency org="org.hibernate" name="hibernate-core" rev="4.2.5.Final"/>
+        <dependency org="org.hibernate" name="hibernate-entitymanager" rev="4.2.5.Final"/>
+            
+        <!-- Spring -->
+        <dependency org="org.springframework" name="spring-core" rev="3.2.4.RELEASE"/>
+        <dependency org="org.springframework" name="spring-context" rev="3.2.4.RELEASE"/>
+        <dependency org="org.springframework" name="spring-web" rev="3.2.4.RELEASE" conf="default"/>
+            
+     
+    </dependencies>
+</ivy-module>
