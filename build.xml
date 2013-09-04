@@ -137,7 +137,7 @@
 				<attribute name="Implementation-Title" value="${version.name}" />
 			</manifest>
 			<lib dir="${lib.dir}">
-				<include name="junit/jar/*.jar"/>
+				<include name="**/jar/*.jar"/>
 				<include name="${log.lib.dir}/*jar"/>
 			</lib>
 			<zipfileset dir="${build.dir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes" />
