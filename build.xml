@@ -58,6 +58,10 @@
 		<ivy:retrieve pattern="${lib.dir}/[organisation]/[type]/[artifact]-[revision].[ext]"/>
 	</target>
 	
+	<target name="echo-classpath" description="prints the resolved classpath" depends="resolve">
+		<echo message="Using classpath ${classpath}" />
+	</target>
+	
 	<target name="remove-after-fail" if="test.failed">
 	    <echo message="Removing build dir after test fail" />
 	    <delete dir="${build.dir}" />
@@ -98,12 +102,27 @@
 			<fileset dir="${basedir}">
 				<exclude name="${build.dir}/" />
 				<exclude name="${dist.dir}/" />
+				<exclude name="${lib.dir}" />
 				<exclude name="build.xml" />
 				<exclude name=".project" />
 				<exclude name="**/.settings" />
 				<exclude name="**/.git" />
 			</fileset>
 		</copy>
+		
+		<echo message="Flattening libs" />
+		<mkdir dir="${build.dir}/lib" />
+		<copy todir="${build.dir}/lib" verbose="${debug}" preservelastmodified="true" flatten="true">
+			<path refid="compile-classpath" />
+		</copy>
+		
+		<path id="lib.classpath">
+			<fileset dir="${build.dir}/lib">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+		<property name="lib.classpath.string" refid="lib.classpath" />
+				
 		<echo message="File copy complete" />
 	</target>
 
@@ -111,10 +130,11 @@
 		<echo message="Building source" />
 		<echo message="Using base dir ${basedir}" />
 		<echo message="Using RemotrUtil dir ${ru.dir}" />
+		<echo message="Using Classpath: ${lib.classpath.string}" />
 		<javac srcdir="${source.dir};${ru.src.dir}" destdir="${bin.dir}" debug="true"
 			debuglevel="lines,vars,source" source="1.6" target="1.6" encoding="UTF-8"
 			includeantruntime="true">
-			<classpath refid="compile-classpath" />
+			<classpath refid="lib.classpath" />
 		</javac>
 	</target>
 
@@ -136,9 +156,8 @@
 				<attribute name="Implementation-Version" value="${version.number}" />
 				<attribute name="Implementation-Title" value="${version.name}" />
 			</manifest>
-			<lib dir="${lib.dir}">
-				<include name="**/jar/*.jar"/>
-				<include name="${log.lib.dir}/*jar"/>
+			<lib dir="${build.dir}/lib">
+				<include name="*.jar"/>
 			</lib>
 			<zipfileset dir="${build.dir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes" />
 			<zipfileset dir="${build.dir}/src" includes="hibernate.properties" prefix="WEB-INF/classes" />
@@ -157,7 +176,7 @@
 
 	<target name="clean-all" depends="init" />
 
-	<target name="tidy-war" depends="war">
+	<target name="tidy-war" depends="war" description="Builds the war file then tidys up">
 		<echo message="Tidying up..." />
 		<delete dir="${build.dir}" />
 		<delete dir="{$build.dir}/classes" />
