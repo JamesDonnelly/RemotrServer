@@ -16,7 +16,7 @@ import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.core.job.JobForwarder;
 import com.matt.remotr.core.job.RemotrJob;
 import com.matt.remotr.main.Main;
-import com.matt.remotr.tcpws.WsSender;
+import com.matt.remotr.ws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponseForwarder;
 import com.matt.remotr.ws.response.domain.WsResponse;

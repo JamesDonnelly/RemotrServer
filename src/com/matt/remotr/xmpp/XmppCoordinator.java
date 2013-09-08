@@ -4,7 +4,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
-import com.matt.remotr.tcpws.WsSender;
+import com.matt.remotr.ws.WsSender;
 import com.matt.remotr.ws.request.domain.WsRequest;
 
 /**

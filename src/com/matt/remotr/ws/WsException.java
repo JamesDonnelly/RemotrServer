@@ -1,4 +1,4 @@
-package com.matt.remotr.ws.response;
+package com.matt.remotr.ws;
 
 public class WsException extends Exception {
 	private static final long serialVersionUID = 1L;

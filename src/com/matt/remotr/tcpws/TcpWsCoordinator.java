@@ -3,6 +3,7 @@ package com.matt.remotr.tcpws;
 import java.util.concurrent.BlockingQueue;
 
 import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.ws.WsSender;
 
 /**
  * Interface for classes implementing TCP Ws coordination. If the implementing class only wants to implement sending, then implement {@link WsSender}
