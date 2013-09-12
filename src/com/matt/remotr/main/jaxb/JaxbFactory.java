@@ -22,6 +22,9 @@ public class JaxbFactory {
 					com.matt.remotr.core.device.domain.ConnectionType.class,
 					com.matt.remotr.core.device.domain.Device.class,
 					
+					//Resource classes
+					com.matt.remotr.core.resource.domain.Resource.class,
+					
 					// Event classes
 					com.matt.remotr.core.event.types.EventType.class,
 					com.matt.remotr.core.event.types.Event.class,

@@ -12,6 +12,7 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         
         <mapping class="com.matt.remotr.core.device.jpa.DeviceJPA"/>
+        <mapping class="com.matt.remotr.core.resource.jpa.ResourceJpa"/>
         <mapping class="com.matt.remotr.core.command.jpa.CommandJPA"/>
         <mapping class="com.matt.remotr.core.argument.jpa.ArgumentJPA"/>
     </session-factory>   
