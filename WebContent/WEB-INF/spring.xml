@@ -14,6 +14,12 @@
 	    <property name="eventForwarder" ref="eventCoordinator" />
 	</bean>
 	<bean id="deviceCoordinatorWs" class="com.matt.remotr.core.device.DeviceCoordinatorWsImpl" autowire="default" />
+	
+	<!-- Resource Subsystem -->
+	<bean id="resourceCoordinator" class="com.matt.remotr.core.resource.ResourceCoordinatorDefault">
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
+		<property name="eventCoordinator" ref="eventCoordinator" />
+	</bean>
 
 	<!-- WsTcp Subsystem -->
 	<bean id="tcpCoordinator" class="com.matt.remotr.tcpws.TcpWsCoordinatorDefault">
@@ -39,6 +45,8 @@
 	<!-- Event Subsystem -->
 	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
+		<property name="resourceCoordinator" ref="resourceCoordinator" />
+		<property name="eventForwarder" ref="eventCoordinator" />
 		<property name="tcpWsSender" ref="tcpCoordinator" />
 		<property name="xmppWsSender" ref="xmppCoordinator" />
 	</bean>
@@ -48,6 +56,7 @@
 	<bean id="jobCoordinator" class="com.matt.remotr.core.job.JobCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="eventCoordinator" ref="eventCoordinator" />
+		<property name="resourceCoordinator" ref="resourceCoordinator" />
 	</bean>
 	<bean id="jobCoordinatorWs" class="com.matt.remotr.core.job.JobCoordinatorWsImpl" autowire="default" />
 
