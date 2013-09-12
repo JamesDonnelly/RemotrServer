@@ -1,0 +1,9 @@
+Remotr Change Log
+==================
+Release Date:
+Version Number: 0.2
+Released By: Matt
+Changes:
+------------------
+Initial release
+==================

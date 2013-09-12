@@ -19,7 +19,6 @@ local.properties
 .settings/
 .loadpath
 .springbeans
-*.txt
 reports/
 
 # External tool builders
