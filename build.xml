@@ -58,7 +58,7 @@
 		<ivy:retrieve pattern="${lib.dir}/[organisation]/[type]/[artifact]-[revision].[ext]"/>
 	</target>
 	
-	<target name="echo-classpath" description="prints the resolved classpath" depends="resolve">
+	<target name="echo-classpath" depends="resolve">
 		<echo message="Using classpath ${classpath}" />
 	</target>
 	
@@ -164,8 +164,6 @@
 			<classes dir="${bin.dir}" />
 		</war>
 		<echo message="WAR file created." />
-		<echo message="Copying config to dist" />
-		<copy file="${webcontent.dir}/WEB-INF/spring.xml" todir="${dist.dir}" overwrite="true" />
 	</target>
 
 	<target name="doc" depends="remove-docs">
@@ -206,6 +204,13 @@
             </fileset>
             <report todir="${reports.dir}/html"/>
         </junitreport>
+	</target>
+	
+	<target name="release" description="Builds war file and packages ready for release" depends="tidy-war">
+		<echo message="Copying config to dist" />
+		<copy file="${webcontent.dir}/WEB-INF/spring.xml" todir="${dist.dir}" overwrite="true" />
+		<echo message="Copying release notes to dist" />
+		<copy file="${basedir}/Remotr.txt" todir="${dist.dir}" overwrite="true" />
 	</target>
 
 </project>
