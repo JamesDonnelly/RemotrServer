@@ -17,6 +17,7 @@ import com.matt.remotr.core.device.jpa.DeviceJPA;
 import com.matt.remotr.core.event.EventForwarder;
 import com.matt.remotr.core.event.types.DeviceEvent;
 import com.matt.remotr.core.event.types.EventType;
+import com.matt.remotr.core.resource.domain.Resource;
 import com.matt.remotr.main.hibernate.HibernateUtil;
 
 /**
@@ -24,6 +25,7 @@ import com.matt.remotr.main.hibernate.HibernateUtil;
  * @author mattm
  *
  */
+// TODO: Add HashMap mapping Device to Device Id
 public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	private DeviceList devices;
 	private Logger log;
@@ -88,6 +90,11 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				if(device.getCommands() != null){
 					for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
 						c.setDeviceId(deviceId);
+					}
+				}
+				if(device.getResources() != null){
+					for(Resource r : device.getResources()){
+						r.setDeviceId(deviceId);
 					}
 				}
 				transaction.commit();
@@ -155,6 +162,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				session.beginTransaction();
 				session.update(deviceJPA);
 				session.getTransaction().commit();
+				
+				DeviceEvent event = new DeviceEvent();
+				event.setEventType(EventType.DEVICE_UPDATE);
+				event.setName("DeviceUpdated");
+				event.setDeviceName(device.getName());
+				event.setDeviceType(device.getType());
+				eventForwarder.forwardEvent(event, null);
+				
 			}catch(HibernateException he){
 				log.error("Error persisting updated device ["+device.getName()+"]");
 				throw new DeviceException("Error updating device");
@@ -274,7 +289,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			log.info("Finished getting persisted devices from database");
 		}catch(Exception e){
 			log.error("Error restoring persisted devices", e);
-			log.error("Panicing - Removing all devices from device list (List currently holds ["+devices.size()+"] devices");
+			log.error("Panicing - Removing all devices from device list (List currently holds ["+devices.size()+"] devices)");
 			devices.removeAll();
 		}
 	}

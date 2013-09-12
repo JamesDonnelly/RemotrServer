@@ -12,6 +12,8 @@ import com.matt.remotr.core.device.DeviceException;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
+import com.matt.remotr.core.resource.ResourceCoordinator;
+import com.matt.remotr.core.resource.domain.Resource;
 import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.EventCoordinatorWs;
 import com.matt.remotr.ws.request.WsRequestManager;
@@ -26,6 +28,8 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	@Autowired
 	private DeviceCoordinator deviceCoordinator;
 	@Autowired
+	private ResourceCoordinator resourceCoordinator;
+	@Autowired
 	private WsRequestManager requestManager;
 	
 	public EventCoordinatorWsImpl(){
@@ -39,19 +43,18 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	}
 
 	@Override
-	public WsResponse sendEvent(Event event, Device device) {
+	public WsResponse sendEvent(Event event) {
 		log.info("Incoming request to forward new event");
 		WsResponse wsResponse = getWsResponseForClass();
-		// Fetch the full device object from the coordinator
 		try{
-			device = deviceCoordinator.getDevice(device);
-			if(device != null){
-				eventCoordinator.forwardEvent(event, device);
+			Resource resource = resourceCoordinator.getResource(event.getResource());
+			if(resource != null){
+				eventCoordinator.forwardEvent(event);
 				wsResponse.setSuccess(true);
 			}
 		}catch(Exception e){
-			log.error("Error sending message ["+event.getName()+"] from device ["+device.getName()+"]", e);
-			wsResponse.setErrorMessage("Error sending message ["+event.getName()+"] to device ["+device.getName()+"]" + e.getMessage());
+			log.error("Error sending message ["+event.getName()+"]", e);
+			wsResponse.setErrorMessage("Error sending message ["+event.getName()+"]" + e.getMessage());
 		}
 		return wsResponse;
 	}
@@ -73,17 +76,17 @@ public class EventCoordinatorWsImpl extends SpringBeanAutowiringSupport implemen
 	}
 
 	@Override
-	public WsResponse getEvents(Device device) {
+	public WsResponse getEvents(Resource resource) {
 		log.info("Incoming request to get events");
 		WsResponse wsResponse = getWsResponseForClass();
 		try{
-			device = deviceCoordinator.getDevice(device);
-			if(device != null){
-				wsResponse.setListResponse(eventCoordinator.getEvents(device));
+			resource = resourceCoordinator.getResource(resource);
+			if(resource != null){
+				wsResponse.setListResponse(eventCoordinator.getEvents(resource));
 				wsResponse.setSuccess(true);
 			}
-		}catch(DeviceException de){
-			log.error("Error when getting events from device", de);
+		}catch(Exception de){
+			log.error("Error when getting events from resource", de);
 			wsResponse.setException(de);
 		}
 		return wsResponse;

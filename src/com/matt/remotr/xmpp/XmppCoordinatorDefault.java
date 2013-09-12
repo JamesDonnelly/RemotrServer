@@ -134,8 +134,8 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	}
 
 	@Override
-	public void handleEvent(Device device, Event event) {
-		eventCoordinator.forwardEvent(event, device);
+	public void handleEvent(Event event) {
+		eventCoordinator.forwardEvent(event);
 	}
 	
 	@Override

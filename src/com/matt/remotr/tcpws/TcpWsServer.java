@@ -154,7 +154,7 @@ public class TcpWsServer extends Thread {
 						if(obj instanceof JobEvent){
 							if(checkDevice()){	
 								JobEvent jobEvent = (JobEvent) obj;
-								eventForwarder.forwardEvent(jobEvent, device);
+								eventForwarder.forwardEvent(jobEvent);
 							}
 						}
 						
@@ -173,7 +173,7 @@ public class TcpWsServer extends Thread {
 						if(obj instanceof Event){
 							if(checkDevice()){
 								Event event = (Event) obj;
-								eventForwarder.forwardEvent(event, device);
+								eventForwarder.forwardEvent(event);
 							}
 						}
 						

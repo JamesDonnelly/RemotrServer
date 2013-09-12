@@ -13,6 +13,8 @@ import com.matt.remotr.core.command.jpa.CommandJPA;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
 import com.matt.remotr.core.device.jpa.DeviceJPA;
+import com.matt.remotr.core.resource.domain.Resource;
+import com.matt.remotr.core.resource.jpa.ResourceJpa;
 
 @XmlType(name="DeviceList")
 class DeviceList {
@@ -48,9 +50,26 @@ class DeviceList {
 			device.setCommands(cList);
 		}
 		
+		if(deviceJpa.getResources() != null){
+			ArrayList<Resource> rList = new ArrayList<Resource>();
+			for(ResourceJpa rJpa : deviceJpa.getResources()){
+				rList.add(jpaToDomain(rJpa));
+			}
+		}
+		
 		return addByDevice(device);
 	}
 	
+	private Resource jpaToDomain(ResourceJpa rJpa) {
+		Resource r = new Resource();
+		r.setId(rJpa.getId());
+		r.setDeviceId(rJpa.getDeviceId());
+		r.setEventType(rJpa.getEventType());
+		r.setResourceName(rJpa.getResourceName());
+		
+		return r;
+	}
+
 	private Command jpaToDomain(CommandJPA jpa){
 		Command c = new Command();
 		c.setId(jpa.getId());

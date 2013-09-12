@@ -19,6 +19,8 @@ import com.matt.remotr.core.command.jpa.CommandJPA;
 import com.matt.remotr.core.device.domain.ConnectionType;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
+import com.matt.remotr.core.resource.domain.Resource;
+import com.matt.remotr.core.resource.jpa.ResourceJpa;
 
 @Entity
 @Table(name="DeviceJPA")
@@ -35,6 +37,7 @@ public class DeviceJPA implements Serializable {
 	private Long lastHeatbeatTime;
 	private boolean hasHeartbeat = false;
 	private ArrayList<CommandJPA> commands;
+	private ArrayList<ResourceJpa> resources;
 	
 	public DeviceJPA() {}
 	
@@ -50,6 +53,13 @@ public class DeviceJPA implements Serializable {
 			this.commands = new ArrayList<CommandJPA>();
 			for(Command c : device.getCommands()){
 				commands.add(toJPA(c));
+			}
+		}
+		
+		if(device.getResources() != null){
+			this.resources = new ArrayList<ResourceJpa>();
+			for(Resource r : device.getResources()){
+				resources.add(toJPA(r));
 			}
 		}
 
@@ -115,8 +125,24 @@ public class DeviceJPA implements Serializable {
 		this.connectionType = connectionType;
 	}
 	
+	public ArrayList<ResourceJpa> getResources() {
+		return resources;
+	}
+ 
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name="deviceId")
+	@Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
+	public void setResources(ArrayList<ResourceJpa> resources) {
+		this.resources = resources;
+	}
+	
 	private CommandJPA toJPA(Command cmd){
 		CommandJPA jpa = new CommandJPA(cmd);
+		return jpa;
+	}
+	
+	private ResourceJpa toJPA(Resource r){
+		ResourceJpa jpa = new ResourceJpa(r);
 		return jpa;
 	}
 

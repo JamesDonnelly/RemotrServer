@@ -31,6 +31,7 @@ import com.matt.remotr.core.event.EventCoordinator;
 import com.matt.remotr.core.event.EventReceiver;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
+import com.matt.remotr.core.resource.ResourceCoordinator;
 
 /**
  * The default implementation of the {@link JobCoordinator}. This is responsible for creating and executing jobs, and creating JOB {@link EventType} to notify 
@@ -46,6 +47,8 @@ public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, Job
 	private Logger log;
 	private EventCoordinator eventCoordinator;
 	private DeviceCoordinator deviceCoordinator;
+	private ResourceCoordinator resourceCoordinator;
+	
 	private Scheduler jobScheduler;
 	private ArrayList<DetailTriggerHolder> jobList;
 	private ConcurrentHashMap<Device, ArrayList<String>> deviceJobListenerMap;
@@ -76,6 +79,10 @@ public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, Job
 
 	public void setDeviceCoordinator(DeviceCoordinator deviceCoordinator) {
 		this.deviceCoordinator = deviceCoordinator;
+	}
+	
+	public void setResourceCoordinator(ResourceCoordinator resourceCoordinator){
+		this.resourceCoordinator = resourceCoordinator;
 	}
 
 	@Override
@@ -253,6 +260,7 @@ public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, Job
 		jobEvent.setJobStatus((JobStatus) jdm.get("jobstatus"));
 		jobEvent.setEventType(EventType.JOB);
 		jobEvent.setName("JobNotification");
+		// TODO: jobEvent.setResource()
 		
 		log.debug("Getting devices interested in job ["+(String) jdm.get("jobname")+"]");
 		
@@ -267,7 +275,7 @@ public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, Job
 				Device d = (Device) pairs.getKey();
 				for(String as : (ArrayList<String>) pairs.getValue()){
 					if(as.equals((String) jdm.get("jobname"))){
-						eventCoordinator.forwardEvent(jobEvent, systemDevice, d);
+						eventCoordinator.forwardEvent(jobEvent, d);
 					}
 				}
 			}

@@ -47,7 +47,7 @@ public interface XmppCoordinator extends WsSender {
 	 * @param device
 	 * @param event
 	 */
-	public void handleEvent(Device device, Event event);
+	public void handleEvent(Event event);
 	
 	/**
 	 * Handles an incoming {@link WsRequest} from the {@link XmppMessageServer}

@@ -15,6 +15,8 @@ import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.core.job.JobForwarder;
 import com.matt.remotr.core.job.RemotrJob;
+import com.matt.remotr.core.resource.ResourceCoordinator;
+import com.matt.remotr.core.resource.domain.Resource;
 import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.WsSender;
 import com.matt.remotr.ws.response.WsJobResponse;
@@ -23,7 +25,8 @@ import com.matt.remotr.ws.response.domain.WsResponse;
 
 /**
  * The default implementation of the EventCoordinator. 
- * This is responsible for passing all incoming events and commands (running in jobs) on either TcpWs or SOAP Ws to the correct place
+ * This is responsible for passing all incoming events and commands (running in jobs) on either TcpWs, XMPP or SOAP Ws 
+ * to the correct place. Events are cached locally against the resource they originated from.
  * All devices entering this class are replaced by the instance stored in the {@link DeviceCoordinatorDefault}
  * @author mattm
  *
@@ -33,21 +36,27 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	private WsSender tcpWsSender;
 	private WsSender xmppWsSender;
 	private DeviceCoordinator deviceCoordinator;
-	private Map<Device, ArrayList<Event>> deviceEventMap; // Holds a map of events and what device they have originated from
+	private ResourceCoordinator resourceCoordinator;
+	
+	// TODO: This should be Resource aware and not cached against devices
+	private Map<Resource, ArrayList<Event>> resourceEventMap; // Holds a map of events and what resource they have originated from
 	private Map<EventType, ArrayList<Device>> eventTypeDeviceMap; // Holds a list of devices that are interested in an event type
 	private ArrayList<EventReceiver> eventReceiverList; // Holds a list of event receivers that have registered
 	
 	public EventCoordinatorDefault(){
 		log = Logger.getLogger(getClass());
 		
-		deviceEventMap = new HashMap<Device, ArrayList<Event>>();
+		resourceEventMap = new HashMap<Resource, ArrayList<Event>>();
 		eventTypeDeviceMap = new HashMap<EventType, ArrayList<Device>>();
 		eventReceiverList = new ArrayList<EventReceiver>();
-		
 	}
 	
-	public void setDeviceCoordinator(DeviceCoordinatorDefault deviceCoordinator) {
+	public void setDeviceCoordinator(DeviceCoordinator deviceCoordinator) {
 		this.deviceCoordinator = deviceCoordinator;
+	}
+	
+	public void setResourceCoordinator(ResourceCoordinator resourceCoordinator){
+		this.resourceCoordinator = resourceCoordinator;
 	}
 
 	public void setTcpWsSender(WsSender tcpWsSender) {
@@ -82,7 +91,7 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void registerForEvents(EventReceiver eventReceiver) {
 		if(!eventReceiverList.contains(eventReceiver)){
@@ -97,59 +106,57 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	}
 	
 	@Override
-	public ArrayList<Event> getEvents(Device device) {
-		device = getDeviceFromCoordinator(device);
-		if(device != null){
-			if(deviceEventMap.containsKey(device)){
-				return deviceEventMap.get(device);
-			}
+	public ArrayList<Event> getEvents(Resource resource) {
+		resource = getResourceFromCoordinator(resource);
+		if(resource != null && resourceEventMap.containsKey(resource)){
+			return resourceEventMap.get(resource);
 		}
 		return null;
 	}
 
 	@Override
-	public int cacheEvent(Event event, Device device){
-		device = getDeviceFromCoordinator(device);
-		if(device != null){
-			if(deviceEventMap.containsKey(device)){
-				log.debug("Device ["+device.getName()+"] is known to the EventCoordinator - Continuing to cache event");
-				if(deviceEventMap.get(device).contains(event)){
-					log.warn("Event ["+event.getName()+"] is already cached for Device ["+device.getName()+"]");
-					return deviceEventMap.get(device).indexOf(event);
+	public int cacheEvent(Event event){
+		Resource resource = getResourceFromCoordinator(event.getResource());
+		if(resource != null){
+			if(resourceEventMap.containsKey(resource)){
+				log.debug("Resource ["+resource.getResourceName()+"] is known to the EventCoordinator - Continuing to cache event");
+				if(resourceEventMap.get(resource).contains(event)){
+					log.warn("Event ["+event.getName()+"] is already cached for resource ["+resource.getResourceName()+"]");
+					return resourceEventMap.get(resource).indexOf(event);
 				}
 			}else{
-				log.debug("New device on cache event - Creating event list for device ["+device.getName()+"]");
+				log.debug("New resource on cache event - Creating event list for resource ["+resource.getResourceName()+"]");
 				ArrayList<Event> eventList = new ArrayList<Event>();
-				deviceEventMap.put(device, eventList);
+				resourceEventMap.put(resource, eventList);
 			}
 			
-			return cacheEventInternal(event, device);
+			return cacheEventInternal(event, resource);
 		}
 		return -1;
 	}
 	
-	private int cacheEventInternal(Event event, Device device){
-		log.info("Adding event ["+event.getName()+"] to cache for device ["+device.getName()+"]");
-		deviceEventMap.get(device).add(event);
-		return deviceEventMap.get(device).indexOf(event);		
+	private int cacheEventInternal(Event event, Resource resource){
+		log.info("Adding event ["+event.getName()+"] to cache for resource ["+resource.getResourceName()+"]");
+		resourceEventMap.get(resource).add(event);
+		return resourceEventMap.get(resource).indexOf(event);		
 	}
 	
 	@Override
-	public void forwardEvent(Device device, int id){
-		device = getDeviceFromCoordinator(device);
-		if(device != null){
-			Event event = deviceEventMap.get(device).get(id);
-			forwardEvent(event, device);
+	public void forwardEvent(Resource resource, int id){
+		resource = getResourceFromCoordinator(resource);
+		if(resource != null){
+			Event event = resourceEventMap.get(resource).get(id);
+			forwardEvent(event);
 		}
 	}
 
 	@Override
-	public void forwardEvent(Event event, Device device) {
-		if(device != null){
-			device = getDeviceFromCoordinator(device);
-			if(event != null && !event.getName().isEmpty() && device !=null){
+	public void forwardEvent(Event event) {
+		if(event.getResource() != null){
+			Resource resource = getResourceFromCoordinator(event.getResource());
+			if(event != null && !event.getName().isEmpty() && resource != null){
 				log.info("Forwarding Event >> ["+event.getName()+"]");
-				cacheEvent(event, device);
+				cacheEvent(event);
 				if(event.getEventType() == EventType.BROADCAST){
 					log.debug("Event ["+event.getName()+"] is a broadcast event");
 					handleBroadcastEvent(event);
@@ -169,7 +176,7 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 					}
 				}			
 			}else{
-				log.error("Error forwarding event");
+				log.error("No resource has been defined for event ["+event.getName()+"]");
 			}
 		}else{ // device is null, so this is internal
 			if(event != null && !event.getName().isEmpty()){
@@ -187,22 +194,23 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	}
 	
 	@Override
-	public void forwardEvent(Event event, Device fromDevice, Device toDevice) {
-		if(toDevice != null && fromDevice != null && event != null){
-			toDevice = getDeviceFromCoordinator(toDevice);
-			fromDevice = getDeviceFromCoordinator(fromDevice);
-			log.info("Forwarding Event >> ["+event.getName()+"] to ["+toDevice.getName()+"]");
-			cacheEvent(event, fromDevice);
+	public void forwardEvent(Event event, Device device) {
+		Resource resource = getResourceFromCoordinator(event.getResource());
+		if(device != null && resource != null && event != null){
+			device = getDeviceFromCoordinator(device);
+			resource = getResourceFromCoordinator(resource);
+			log.info("Forwarding Event >> ["+event.getName()+"] to ["+device.getName()+"]");
+			cacheEvent(event);
 			
 			WsResponse wsResponse = wrapEvent(event);
-			sendMessage(toDevice, wsResponse);	
+			sendMessage(device, wsResponse);	
 		}
 	}
 
 	@Override
 	public void forwardJob(Device device, RemotrJob job) {
 		if(device !=null){
-			getDeviceFromCoordinator(device);
+			device = getDeviceFromCoordinator(device);
 			if(device != null || job != null){
 				log.info("Forwarding RemotrJob >> ["+job.getJobName()+"]");
 				// Jobs are not cached
@@ -257,10 +265,22 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 		forwardEvent(event, null);		
 	}
 	
-	private Device getDeviceFromCoordinator(Device device){
+	private Device getDeviceFromCoordinator(Device device) {
 		try {
 			return deviceCoordinator.getDevice(device);
 		} catch (DeviceException e) {
+			log.error(e.getMessage());
+		}
+		
+		return null;
+	}
+	
+	private Resource getResourceFromCoordinator(Resource resource){
+		try {
+			if(resource != null){
+				return resourceCoordinator.getResource(resource);
+			}
+		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
 		

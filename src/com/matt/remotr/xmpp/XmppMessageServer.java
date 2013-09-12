@@ -96,7 +96,7 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 			
 			if(obj instanceof Event){
 				Event event = (Event) obj;
-				xmppCoordinator.handleEvent(device, event);
+				xmppCoordinator.handleEvent(event);
 				
 				WsResponse response = new WsResponse();
 				response.setReference(event.getRefference());
