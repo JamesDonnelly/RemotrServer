@@ -2,6 +2,7 @@ package com.matt.remotr.core.argument.jpa;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -10,11 +11,9 @@ import javax.persistence.Table;
 import com.matt.remotr.core.argument.domain.Argument;
 
 @Entity
-@Table(name="ArgumentJPA")
+@Table(name="argument")
 public class ArgumentJPA implements Serializable {
 	
-	@Id
-	@GeneratedValue
 	private Long id;
 	private Long commandId;
 	private String type;
@@ -34,10 +33,14 @@ public class ArgumentJPA implements Serializable {
 		this.id = id;
 	}
 	
+	@Id
+	@GeneratedValue
+	@Column(name = "argument_id")
 	public Long getId() {
 		return id;
 	}
 
+	@Column(name = "command_id")
 	public Long getCommandId() {
 		return commandId;
 	}
@@ -46,10 +49,12 @@ public class ArgumentJPA implements Serializable {
 		this.commandId = commandId;
 	}
 
+	@Column(name = "argument_type")
 	public String getType() {
 		return type;
 	}
 
+	@Column(name = "argument_value")
 	public String getValue() {
 		return value;
 	}
@@ -60,6 +65,31 @@ public class ArgumentJPA implements Serializable {
 	
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ArgumentJPA other = (ArgumentJPA) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
 	}
 
 

@@ -1,13 +1,17 @@
 package com.matt.remotr.core.device.jpa;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -22,22 +26,22 @@ import com.matt.remotr.core.device.domain.DeviceType;
 import com.matt.remotr.core.resource.domain.Resource;
 import com.matt.remotr.core.resource.jpa.ResourceJpa;
 
+@NamedQueries(
+	@NamedQuery(name="device.getById", query="from DeviceJPA where device_id = :deviceId")
+	)
 @Entity
-@Table(name="DeviceJPA")
+@Table(name="device")
 public class DeviceJPA implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue
 	private Long deviceId;
 	private String name;
 	private DeviceType type;
 	private ConnectionType connectionType;
 	private Long lastHeatbeatTime;
 	private boolean hasHeartbeat = false;
-	private ArrayList<CommandJPA> commands;
-	private ArrayList<ResourceJpa> resources;
+	private Set<CommandJPA> commands;
+	private Set<ResourceJpa> resources;
 	
 	public DeviceJPA() {}
 	
@@ -50,14 +54,14 @@ public class DeviceJPA implements Serializable {
 		this.hasHeartbeat = device.isHadHeartbeat();
 		
 		if(device.getCommands() != null){
-			this.commands = new ArrayList<CommandJPA>();
+			this.commands = new HashSet<CommandJPA>();
 			for(Command c : device.getCommands()){
 				commands.add(toJPA(c));
 			}
 		}
 		
 		if(device.getResources() != null){
-			this.resources = new ArrayList<ResourceJpa>();
+			this.resources = new HashSet<ResourceJpa>();
 			for(Resource r : device.getResources()){
 				resources.add(toJPA(r));
 			}
@@ -69,6 +73,9 @@ public class DeviceJPA implements Serializable {
 		this.deviceId = id;
 	}
 	
+	@Id
+	@GeneratedValue
+	@Column(name = "device_id")
 	public Long getId() {
 		return deviceId;
 	}
@@ -77,6 +84,7 @@ public class DeviceJPA implements Serializable {
 		this.type = type;
 	}
 
+	@Column(name = "device_type")
 	public DeviceType getType() {
 		return type;
 	}
@@ -85,15 +93,17 @@ public class DeviceJPA implements Serializable {
 		this.name = name;
 	}
 
+	@Column(name = "device_name")
 	public String getName() {
 		return name;
 	}
 	
-	public void setLastHeatbeatTime(Long lastHeatbeatTime) {
+	public void setLastHeartbeatTime(Long lastHeatbeatTime) {
 		this.lastHeatbeatTime = lastHeatbeatTime;
 		hasHeartbeat = true;
 	}
 
+	@Column(name = "heartbeat_time")
 	public Long getLastHeartbeatTime() {
 		return lastHeatbeatTime;
 	}
@@ -102,21 +112,27 @@ public class DeviceJPA implements Serializable {
 		this.hasHeartbeat = hasHeartbeat;
 	}
 
-	public boolean isHadHeartbeat() {
+	@Column(name = "had_heartbeat")
+	public boolean getHasHeartbeat() {
 		return hasHeartbeat;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="deviceId")
+	@OneToMany
+	@JoinTable(
+            name="device_command_link",
+            joinColumns = @JoinColumn(name="device_id"),
+            inverseJoinColumns = @JoinColumn(name="command_id")
+    )
 	@Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
-	public ArrayList<CommandJPA> getCommands() {
+	public Set<CommandJPA> getCommands() {
 		return commands;
 	}
 	
-	public void setCommands(ArrayList<CommandJPA> commands) {
+	public void setCommands(Set<CommandJPA> commands) {
 		this.commands = commands;
 	}
 
+	@Column(name = "connection_type")
 	public ConnectionType getConnectionType() {
 		return connectionType;
 	}
@@ -125,14 +141,18 @@ public class DeviceJPA implements Serializable {
 		this.connectionType = connectionType;
 	}
 	
-	public ArrayList<ResourceJpa> getResources() {
+	@OneToMany
+	@JoinTable(
+            name="device_resource_link",
+            joinColumns = @JoinColumn(name="device_id"),
+            inverseJoinColumns = @JoinColumn(name="resource_id")
+    )
+	@Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
+	public Set<ResourceJpa> getResources() {
 		return resources;
 	}
  
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name="deviceId")
-	@Cascade({CascadeType.SAVE_UPDATE, CascadeType.DELETE})
-	public void setResources(ArrayList<ResourceJpa> resources) {
+	public void setResources(Set<ResourceJpa> resources) {
 		this.resources = resources;
 	}
 	
