@@ -33,6 +33,7 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 	private Map<Long, Resource> resourceMap;
 	
 	public ResourceCoordinatorDefault(){
+		log = Logger.getLogger(this.getClass());
 		resourceMap = new HashMap<Long, Resource>();
 	}
 	
@@ -42,6 +43,14 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 		triggerRecache();
 	}
 	
+	public void setEventCoordinator(EventCoordinator eventCoordinator) {
+		this.eventCoordinator = eventCoordinator;
+	}
+
+	public void setDeviceCoordinator(DeviceCoordinator deviceCoordinator) {
+		this.deviceCoordinator = deviceCoordinator;
+	}
+
 	@Override
 	public Resource getResource(Long id) {
 		log.debug("Incoming request to get cached resource with Id ["+id+"]");
@@ -93,10 +102,11 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 
 	}
 
-	@Override
+	@Override // TODO: React to device deregister
 	public void onEvent(Event event) {
 		if(event.getEventType().equals(EventType.DEVICE_REGISTER) || 
-				event.getEventType().equals(EventType.DEVICE_UPDATE)){
+				event.getEventType().equals(EventType.DEVICE_UPDATE) || 
+				event.getEventType().equals(EventType.DEVICE_UNREGISTER)){
 			triggerRecache();
 		}
 	}
@@ -106,11 +116,13 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 			log.info("Recache of resources triggered");
 			resourceMap.clear();
 			ArrayList<Device> deviceList = deviceCoordinator.getAllRegisteredDevices();
-			for(Device d : deviceList){
-				ArrayList<Resource> resourceList = d.getResources();
-				if(resourceList != null){
-					for(Resource r : resourceList){
-						resourceMap.put(r.getId(), r);
+			if(deviceList != null){
+				for(Device d : deviceList){
+					ArrayList<Resource> resourceList = d.getResources();
+					if(resourceList != null){
+						for(Resource r : resourceList){
+							resourceMap.put(r.getId(), r);
+						}
 					}
 				}
 			}
