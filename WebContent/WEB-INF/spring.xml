@@ -40,13 +40,13 @@
 	    <constructor-arg name="xmppServerAddress" value="192.168.1.1" />
 	    <constructor-arg name="deviceCoordinator" ref="deviceCoordinator" />
 	    <property name="requestManager" ref="wsRequestManager" />
+	    <property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
 
 	<!-- Event Subsystem -->
 	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
-		<property name="eventForwarder" ref="eventCoordinator" />
 		<property name="tcpWsSender" ref="tcpCoordinator" />
 		<property name="xmppWsSender" ref="xmppCoordinator" />
 	</bean>
