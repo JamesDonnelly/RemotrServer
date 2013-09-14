@@ -140,7 +140,7 @@
 
 	<target name="compile-tests" depends="remove-bin, init, resolve, build, compile">
 	    <echo message="Building tests" />
-		<javac srcdir="${test.dir}" destdir="${lib.dir}/test"
+		<javac srcdir="${test.dir}" destdir="${bin.dir}/test"
 			includeantruntime="true" debuglevel="lines,vars,source" source="1.6"
 			target="1.6" encoding="UTF-8" >
 			<classpath>
@@ -180,7 +180,7 @@
 		<delete dir="{$build.dir}/classes" />
 	</target>
 
-	<target name="test-war" depends="compile-tests, tidy-war">
+	<target name="test-war" depends="compile-tests">
 		<junit haltonfailure="no" failureproperty="test.failed" printsummary="true">
 			<classpath>
 			    <path refid="test-classpath" />
@@ -188,7 +188,7 @@
 			<formatter type="brief" usefile="false" />
 			<formatter type="xml"/>
 			<batchtest todir="${reports.dir}">
-				<fileset dir="${lib.dir}/test">
+				<fileset dir="${bin.dir}/test">
 					<include name="**/*Test*" />
 				</fileset>
 			</batchtest>
@@ -196,7 +196,7 @@
 		<antcall target="remove-after-fail" />
 	</target>
 	
-	<target name="test-war-report" depends="test-war">
+	<target name="report" depends="test-war">
 	    <mkdir dir="${reports.dir}/html"/>
 	    <junitreport todir="${reports.dir}">
 	        <fileset dir="${reports.dir}">
