@@ -97,7 +97,8 @@ public class JobCoordinatorDefault implements JobCoordinator, EventReceiver, Job
 		jobDataMap.put("jobstatus", JobStatus.CREATED);
 		
 		try {
-			Device device = deviceCoordinator.getDeviceById(command.getDeviceId());
+			// FIXME: Add method to deviceCoordinator or command coordinator to get the parent device by the commands id
+			Device device = deviceCoordinator.getDeviceById(1L);
 			jobDataMap.put("device", device);
 		} catch (DeviceException e) {
 			log.error("Device not found when creating job ["+e.getMessage()+"]");
