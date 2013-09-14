@@ -15,7 +15,6 @@ public interface EventForwarder {
 	/**
 	 * Can be called externally to cache an {@link Event} from a {@link Resource} to send later. 
 	 * @param event
-	 * @Param device
 	 * 
 	 * @return int
 	 */
@@ -32,7 +31,6 @@ public interface EventForwarder {
 	 * Forwards the given event and caches it against a {@link Resource}.
 	 * This method uses {@link EventType} to decide what to do with the {@link Event}
 	 * @param event
-	 * @param device
 	 */
 	public void forwardEvent(Event event);
 	
