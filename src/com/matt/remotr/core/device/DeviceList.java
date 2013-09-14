@@ -38,7 +38,7 @@ class DeviceList {
 		device.setName(deviceJpa.getName());
 		device.setType(deviceJpa.getType());
 		device.setConnectionType(deviceJpa.getConnectionType());
-		device.setHasHeartbeat(deviceJpa.isHadHeartbeat());
+		device.setHasHeartbeat(deviceJpa.getHasHeartbeat());
 		device.setLastHeatbeatTime(deviceJpa.getLastHeartbeatTime());
 		
 		// Convert from JPA to Domain for all types here
@@ -63,7 +63,6 @@ class DeviceList {
 	private Resource jpaToDomain(ResourceJpa rJpa) {
 		Resource r = new Resource();
 		r.setId(rJpa.getId());
-		r.setDeviceId(rJpa.getDeviceId());
 		r.setEventType(rJpa.getEventType());
 		r.setResourceName(rJpa.getResourceName());
 		
@@ -73,7 +72,6 @@ class DeviceList {
 	private Command jpaToDomain(CommandJPA jpa){
 		Command c = new Command();
 		c.setId(jpa.getId());
-		c.setDeviceId(jpa.getDeviceId());
 		c.setName(jpa.getName());
 		c.setTrigger(jpa.getTrigger());
 		
