@@ -3,13 +3,18 @@ package com.matt.remotr.core.device;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.matt.remotr.core.argument.domain.Argument;
+import com.matt.remotr.core.argument.jpa.ArgumentJPA;
 import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.command.jpa.CommandJPA;
 import com.matt.remotr.core.device.domain.ConnectionType;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.device.domain.DeviceType;
@@ -18,6 +23,7 @@ import com.matt.remotr.core.event.EventForwarder;
 import com.matt.remotr.core.event.types.DeviceEvent;
 import com.matt.remotr.core.event.types.EventType;
 import com.matt.remotr.core.resource.domain.Resource;
+import com.matt.remotr.core.resource.jpa.ResourceJpa;
 import com.matt.remotr.main.hibernate.HibernateUtil;
 
 /**
@@ -26,6 +32,8 @@ import com.matt.remotr.main.hibernate.HibernateUtil;
  *
  */
 // TODO: Add HashMap mapping Device to Device Id
+// TODO: Fix issue where resources and commands are persisted twice due to update (being different)
+// TODO: Set Ids on Command, Resource and Argument domain objects after persisting
 public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	private DeviceList devices;
 	private Logger log;
@@ -62,7 +70,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		}finally{
 			session.close();
 		}
-		
+	}
+	
+	@PostConstruct
+	public void init(){
 		// Register the SYSTEM device
 		Device d = new Device();
 		d.setName("SYSTEM");
@@ -86,29 +97,47 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				session = HibernateUtil.getSessionFactory().openSession();
 				transaction = session.beginTransaction();
 				Long deviceId = (Long) session.save(deviceJPA);
-				device.setId(deviceId);
-				if(device.getCommands() != null){
-					for(Command c : device.getCommands()){ // TODO: fix npe here when a register device comes in from the TcpWs
-						c.setDeviceId(deviceId);
-					}
-				}
-				if(device.getResources() != null){
-					for(Resource r : device.getResources()){
-						r.setDeviceId(deviceId);
-					}
-				}
 				transaction.commit();
-				log.info("Device ["+device.getName()+"] registered");
+				device.setId(deviceId);
 				
-				// Update now as we have set the correct Ids on the Device
-				updateDevice(device);
+				Query queryDeviceById = session.getNamedQuery("device.getById");
+				queryDeviceById.setLong("deviceId", deviceId);
+				List<?> tmpDevices = queryDeviceById.list();
+				for (int i = 0; i < tmpDevices.size(); i++) {  
+					DeviceJPA deviceJpa = (DeviceJPA) tmpDevices.get(i);
+					if(deviceJpa.getCommands() != null){
+						for(CommandJPA cJpa : deviceJpa.getCommands()){
+							for(Command c : device.getCommands()){
+								if(c.getName() == cJpa.getName()){
+									c.setId(cJpa.getId());
+								}
+								if(cJpa.getArguments() != null){
+									for(ArgumentJPA aJpa: cJpa.getArguments()){
+										for(Argument a : c.getArguments()){
+											a.setId(aJpa.getId());
+										}
+									}
+								}
+							}
+						}
+					}
+					if(deviceJpa.getResources() != null){
+						for(ResourceJpa rJpa : deviceJpa.getResources()){
+							for(Resource r : device.getResources()){
+								r.setId(rJpa.getId());
+							}
+						}
+					}
+				}
+				
+				log.info("Device ["+device.getName()+"] registered");
 				
 				DeviceEvent event = new DeviceEvent();
 				event.setEventType(EventType.DEVICE_REGISTER);
 				event.setName("DeviceRegistered");
 				event.setDeviceName(device.getName());
 				event.setDeviceType(device.getType());
-				eventForwarder.forwardEvent(event, null);
+				eventForwarder.forwardEvent(event);
 				return true;
 			}catch(HibernateException he){
 				log.error("Error persisting Device ["+device.getName()+"]", he);
@@ -142,6 +171,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			session.getTransaction().commit();
 			devices.removeByDevice(device);
 			log.info("Device ["+device.getName()+"] deregistered");
+			
+			DeviceEvent event = new DeviceEvent();
+			event.setEventType(EventType.DEVICE_UNREGISTER);
+			event.setDeviceName(device.getName());
+			event.setDeviceType(device.getType());
+			event.setName("DeviceDeregistered");
+			eventForwarder.forwardEvent(event);
+			
 			return true;
 		}catch(HibernateException he){
 			log.error("Error removing persisted object", he);
@@ -251,10 +288,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	@Override
 	public ArrayList<Device> getAllRegisteredDevices() {
 		log.info("Incoming request to get all devices");
-		if(devices != null || devices.size() > 0){
+		if(devices != null && devices.size() > 0){
 			return devices.getDevices();
 		}		
-		return null;
+		return new ArrayList<Device>();
 	}
 	
 	@Override
