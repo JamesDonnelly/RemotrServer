@@ -89,7 +89,6 @@ class DeviceList {
 	private Argument jpaToDomain(ArgumentJPA jpa){
 		Argument a = new Argument();
 		a.setId(jpa.getId());
-		a.setCommandId(jpa.getCommandId());
 		a.setType(jpa.getType());
 		a.setValue(jpa.getValue());
 		

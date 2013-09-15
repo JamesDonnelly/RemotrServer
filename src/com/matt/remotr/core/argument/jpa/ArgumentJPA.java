@@ -15,7 +15,6 @@ import com.matt.remotr.core.argument.domain.Argument;
 public class ArgumentJPA implements Serializable {
 	
 	private Long id;
-	private Long commandId;
 	private String type;
 	private String value;
 	private static final long serialVersionUID = 1L;
@@ -24,7 +23,6 @@ public class ArgumentJPA implements Serializable {
 	
 	public ArgumentJPA(Argument argument){
 		this.id = argument.getId();
-		this.commandId = argument.getCommandId();
 		this.type = argument.getType();
 		this.value = argument.getValue();		
 	}
@@ -38,15 +36,6 @@ public class ArgumentJPA implements Serializable {
 	@Column(name = "argument_id")
 	public Long getId() {
 		return id;
-	}
-
-	@Column(name = "command_id")
-	public Long getCommandId() {
-		return commandId;
-	}
-
-	public void setCommandId(Long commandId) {
-		this.commandId = commandId;
 	}
 
 	@Column(name = "argument_type")
