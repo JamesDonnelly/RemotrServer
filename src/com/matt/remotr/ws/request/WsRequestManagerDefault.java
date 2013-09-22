@@ -19,6 +19,8 @@ import com.matt.remotr.ws.response.WsResponseForwarder;
 import com.matt.remotr.ws.response.domain.WsDeviceResponse;
 import com.matt.remotr.ws.response.domain.WsResponse;
 
+// TODO: Make this easier...
+// TODO: Add a message queue to stop this class from becoming overloaded
 public class WsRequestManagerDefault implements WsRequestManager, WsRequestRunner{
 	private Logger log;
 	private WsResponseForwarder responseForwarder;
@@ -180,6 +182,9 @@ public class WsRequestManagerDefault implements WsRequestManager, WsRequestRunne
 	@WsRequestMethod
 	public WsResponse getAll(){
 		WsResponse response = getWsResponse();
+		
+		
+		
 		ArrayList<Map<String, Map<String, ArrayList<String>>>> list = new ArrayList<Map<String, Map<String, ArrayList<String>>>>();
 		ArrayList<String> subsystems = new ArrayList<String>(runnerMap.keySet());
 		

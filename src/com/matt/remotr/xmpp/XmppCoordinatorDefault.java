@@ -43,6 +43,7 @@ import com.matt.remotr.ws.response.domain.WsResponse;
  * @author mattm
  *
  */
+// TODO: Fix issue where message thread is still matained if the given device does not match Xmpp user name
 public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	private Logger log;
 	private Marshaller marshaller = null;
