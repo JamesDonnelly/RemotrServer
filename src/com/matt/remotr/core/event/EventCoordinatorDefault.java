@@ -178,7 +178,7 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 			}else{
 				log.error("No resource has been defined for event ["+event.getName()+"]");
 			}
-		}else{ // device is null, so this is internal
+		}else{ // resource is null, so this is internal
 			if(event != null && !event.getName().isEmpty()){
 				log.info("Forwarding Event >> ["+event.getName()+"] internally");
 				for(EventReceiver er : eventReceiverList){
