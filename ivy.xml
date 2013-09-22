@@ -6,6 +6,10 @@
             
     	<!-- Junit and testing -->
         <dependency org="junit" name="junit" rev="4.11"/>
+        <dependency org="org.mockito" name="mockito-all" rev="1.9.5"/>
+        
+        <!-- Cargo -->
+        <!-- dependency org="org.codehaus.cargo" name="cargo-core-uberjar" rev="1.4.3"/ -->
         
         <!-- Logging -->
         <dependency org="log4j" name="log4j" rev="1.2.17"/>

@@ -37,6 +37,8 @@
 		<fileset dir="${lib.dir}">
 		    <include name="**/jar/*.jar"/>
 			<exclude name="junit/jar/*.jar"/>
+			<exclude name="org.hamcrest/jar/*.jar"/>
+			<exclude name="org.mockito/jar/*.jar"/>
 		</fileset>
 		<fileset dir="${log.lib.dir}">
 			<include name="*.jar"/>
@@ -46,6 +48,12 @@
 	<path id="test-classpath"> 
 		<fileset dir="${lib.dir}">
 		    <include name="junit/jar/*.jar"/>
+		</fileset>
+		<fileset dir="${lib.dir}">
+			<include name="org.hamcrest/jar/*.jar"/>
+		</fileset>
+		<fileset dir="${lib.dir}">
+			<include name="org.mockito/jar/*.jar"/>
 		</fileset>
   		<pathelement location="${bin.dir}\test" />
   		<pathelement location="${bin.dir}" />
