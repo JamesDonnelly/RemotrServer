@@ -19,8 +19,8 @@ import com.matt.remotr.core.resource.ResourceCoordinator;
 import com.matt.remotr.core.resource.domain.Resource;
 import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.WsSender;
-import com.matt.remotr.ws.response.WsJobResponse;
 import com.matt.remotr.ws.response.WsResponseForwarder;
+import com.matt.remotr.ws.response.domain.WsJobResponse;
 import com.matt.remotr.ws.response.domain.WsResponse;
 
 /**
@@ -38,7 +38,6 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	private DeviceCoordinator deviceCoordinator;
 	private ResourceCoordinator resourceCoordinator;
 	
-	// TODO: This should be Resource aware and not cached against devices
 	private Map<Resource, ArrayList<Event>> resourceEventMap; // Holds a map of events and what resource they have originated from
 	private Map<EventType, ArrayList<Device>> eventTypeDeviceMap; // Holds a list of devices that are interested in an event type
 	private ArrayList<EventReceiver> eventReceiverList; // Holds a list of event receivers that have registered
