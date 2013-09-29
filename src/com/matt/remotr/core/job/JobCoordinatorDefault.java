@@ -31,6 +31,8 @@ import com.matt.remotr.core.event.EventCoordinator;
 import com.matt.remotr.core.event.EventReceiver;
 import com.matt.remotr.core.event.types.Event;
 import com.matt.remotr.core.event.types.EventType;
+import com.matt.remotr.core.event.types.JobEvent;
+import com.matt.remotr.core.job.domain.JobStatus;
 import com.matt.remotr.core.resource.ResourceCoordinator;
 
 /**

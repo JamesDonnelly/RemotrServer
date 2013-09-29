@@ -9,6 +9,7 @@ import org.quartz.PersistJobDataAfterExecution;
 
 import com.matt.remotr.core.command.domain.Command;
 import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.job.domain.JobStatus;
 
 /**
  * An implementation of the Quartz Job interface for running commands that run on devices.

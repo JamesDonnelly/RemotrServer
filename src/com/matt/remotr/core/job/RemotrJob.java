@@ -3,6 +3,7 @@ package com.matt.remotr.core.job;
 import org.quartz.JobKey;
 
 import com.matt.remotr.core.command.domain.Command;
+import com.matt.remotr.core.job.domain.JobStatus;
 
 /**
  * Base job class that all job classes should extend

@@ -20,7 +20,7 @@ import com.matt.remotr.core.device.domain.ConnectionType;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.core.event.EventForwarder;
 import com.matt.remotr.core.event.types.Event;
-import com.matt.remotr.core.job.JobEvent;
+import com.matt.remotr.core.event.types.JobEvent;
 import com.matt.remotr.main.jaxb.JaxbFactory;
 import com.matt.remotr.ws.response.domain.WsResponse;
 

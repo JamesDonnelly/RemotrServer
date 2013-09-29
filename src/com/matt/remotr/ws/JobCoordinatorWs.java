@@ -7,7 +7,7 @@ import javax.jws.WebService;
 import com.matt.remotr.core.command.domain.Command;
 import com.matt.remotr.core.device.domain.Device;
 import com.matt.remotr.ws.request.WsRequestRunner;
-import com.matt.remotr.ws.response.WsJobResponse;
+import com.matt.remotr.ws.response.domain.WsJobResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl")
 public interface JobCoordinatorWs extends WsRequestRunner {

@@ -10,10 +10,11 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.matt.remotr.core.command.domain.Command;
 import com.matt.remotr.core.device.domain.Device;
+import com.matt.remotr.core.job.domain.JobStatus;
 import com.matt.remotr.main.Main;
 import com.matt.remotr.ws.JobCoordinatorWs;
 import com.matt.remotr.ws.request.WsRequestManager;
-import com.matt.remotr.ws.response.WsJobResponse;
+import com.matt.remotr.ws.response.domain.WsJobResponse;
 
 @WebService(targetNamespace="http://remotr.org/wsdl", endpointInterface="com.matt.remotr.ws.JobCoordinatorWs", serviceName="job")
 public class JobCoordinatorWsImpl extends SpringBeanAutowiringSupport implements JobCoordinatorWs {
