@@ -12,9 +12,9 @@
   <property name="hibernate.show_sql">false</property>
   <property name="hibernate.format_sql">true</property>
   <property name="hibernate.session_factory_name">sessionFactory</property>
-  <mapping class="com.matt.remotr.core.device.jpa.DeviceJPA"/>
-  <mapping class="com.matt.remotr.core.command.jpa.CommandJPA"/>
-  <mapping class="com.matt.remotr.core.argument.jpa.ArgumentJPA"/>
-  <mapping class="com.matt.remotr.core.resource.jpa.ResourceJpa"/>
+  <mapping class="com.remotr.subsystem.device.jpa.DeviceJPA"/>
+  <mapping class="com.remotr.subsystem.device.command.jpa.CommandJPA"/>
+  <mapping class="com.remotr.subsystem.device.argument.jpa.ArgumentJPA"/>
+  <mapping class="com.remotr.subsystem.device.resource.jpa.ResourceJpa"/>
  </session-factory>
 </hibernate-configuration>

@@ -13,6 +13,8 @@
         
         <!-- Logging -->
         <dependency org="log4j" name="log4j" rev="1.2.17"/>
+        <dependency org="org.slf4j" name="slf4j-api" rev="1.7.5"/>
+        <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.7.5"/>
         
         <!-- Job Scheduling -->
         <dependency org="org.quartz-scheduler" name="quartz" rev="2.2.0"/>
@@ -32,6 +34,10 @@
         <dependency org="org.springframework" name="spring-core" rev="3.2.4.RELEASE"/>
         <dependency org="org.springframework" name="spring-context" rev="3.2.4.RELEASE"/>
         <dependency org="org.springframework" name="spring-web" rev="3.2.4.RELEASE" conf="default"/>
-
+        
+        <!-- JAX RS and Jersey -->
+        <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1.1"/>
+        <dependency org="com.sun.jersey" name="jersey-bundle" rev="1.7"/>
+        
     </dependencies>
 </ivy-module>

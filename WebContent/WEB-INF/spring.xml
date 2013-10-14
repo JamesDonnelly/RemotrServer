@@ -9,20 +9,29 @@
        
     <context:annotation-config />
 
+	<!-- WS Subsystem -->
+	<bean id="wsCoordinatorService" class="com.remotr.subsystem.ws.WsCoordinatorService" autowire="default" />
+	<bean id="wsCoordinator" class="com.remotr.subsystem.ws.WsCoordinatorDefault">
+	    <property name="responseForwarder" ref="eventCoordinator"/>
+	</bean>
+	
 	<!-- Device Subsystem -->
-	<bean id="deviceCoordinator" class="com.matt.remotr.core.device.DeviceCoordinatorDefault">
+	<bean id="deviceCoordinator" class="com.remotr.subsystem.device.DeviceCoordinatorDefault">
 	    <property name="eventForwarder" ref="eventCoordinator" />
 	</bean>
-	<bean id="deviceCoordinatorWs" class="com.matt.remotr.core.device.DeviceCoordinatorWsImpl" autowire="default" />
+	<bean id="deviceCoordinatorWs" class="com.remotr.subsystem.device.DeviceCoordinatorService">
+		<property name="wsCoordinator" ref="wsCoordinator" />
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
+	</bean>
 	
 	<!-- Resource Subsystem -->
-	<bean id="resourceCoordinator" class="com.matt.remotr.core.resource.ResourceCoordinatorDefault">
+	<bean id="resourceCoordinator" class="com.remotr.subsystem.device.resource.ResourceCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
 
 	<!-- WsTcp Subsystem -->
-	<bean id="tcpCoordinator" class="com.matt.remotr.tcpws.TcpWsCoordinatorDefault">
+	<bean id="tcpCoordinator" class="com.remotr.subsystem.tcpws.TcpWsCoordinatorDefault">
 		<constructor-arg name="tcpWsEnabled" value="true" />
 		<constructor-arg name="portNumber" value="3030" />
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
@@ -30,34 +39,37 @@
 		<property name="maxConnections" value="10" />
 	</bean>
 	
-	<!-- Request Managers -->
-	<bean id="wsRequestManager" class="com.matt.remotr.ws.request.WsRequestManagerDefault">
-	    <property name="responseForwarder" ref="eventCoordinator"/>
-	</bean>
-	
 	<!-- XMPP SubSystem -->
-	<bean id="xmppCoordinator" class="com.matt.remotr.xmpp.XmppCoordinatorDefault">
+	<bean id="xmppCoordinator" class="com.remotr.subsystem.xmpp.XmppCoordinatorDefault">
 	    <constructor-arg name="xmppServerAddress" value="192.168.1.1" />
 	    <constructor-arg name="deviceCoordinator" ref="deviceCoordinator" />
-	    <property name="requestManager" ref="wsRequestManager" />
+	    <property name="requestManager" ref="wsCoordinator" />
 	    <property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
 
 	<!-- Event Subsystem -->
-	<bean id="eventCoordinator" class="com.matt.remotr.core.event.EventCoordinatorDefault">
+	<bean id="eventCoordinator" class="com.remotr.subsystem.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
 		<property name="tcpWsSender" ref="tcpCoordinator" />
 		<property name="xmppWsSender" ref="xmppCoordinator" />
 	</bean>
-	<bean id="eventCoordinatorWs" class="com.matt.remotr.core.event.EventCoordinatorWsImpl" autowire="default" />
+	<bean id="eventCoordinatorWs" class="com.remotr.subsystem.event.EventCoordinatorService">
+		<property name="eventCoordinator" ref="eventCoordinator"/>
+		<property name="deviceCoordinator" ref="deviceCoordinator"/>
+		<property name="resourceCoordinator" ref="resourceCoordinator"/>
+		<property name="wsCoordinator" ref="wsCoordinator"/>
+	</bean>
 
 	<!-- Job subsystem -->
-	<bean id="jobCoordinator" class="com.matt.remotr.core.job.JobCoordinatorDefault">
+	<bean id="jobCoordinator" class="com.remotr.subsystem.job.JobCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="eventCoordinator" ref="eventCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
 	</bean>
-	<bean id="jobCoordinatorWs" class="com.matt.remotr.core.job.JobCoordinatorWsImpl" autowire="default" />
+	<bean id="jobCoordinatorWs" class="com.remotr.subsystem.job.JobCoordinatorService">
+		<property name="wsCoordinator" ref="wsCoordinator" />
+		<property name="jobCoordinator" ref="jobCoordinator" />
+	</bean>
 
 </beans>

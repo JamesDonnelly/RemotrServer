@@ -6,7 +6,7 @@
   </listener>
   <servlet>
     <servlet-name>Remotr</servlet-name>
-    <servlet-class>com.matt.remotr.main.Main</servlet-class>
+    <servlet-class>com.remotr.core.Main</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
@@ -15,6 +15,20 @@
   </servlet-mapping>
   <context-param>
   	<param-name>contextConfigLocation</param-name>
-    <param-value>file:/home/matt/remotr/config/spring.xml</param-value>
+    <!--param-value>file:/home/matt/remotr/config/spring.xml</param-value-->
+    <param-value>/WEB-INF/spring.xml</param-value>
  </context-param>
+ <servlet>
+    <servlet-name>RemotrWs</servlet-name>
+   	<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+   	<init-param>
+	     <param-name>com.sun.jersey.config.property.packages</param-name>
+	     <param-value>com.remotr.subsystem.ws</param-value>
+	</init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RemotrWs</servlet-name>
+    <url-pattern>/ws/*</url-pattern>
+  </servlet-mapping>
 </web-app>
