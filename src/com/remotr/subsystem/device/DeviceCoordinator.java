@@ -4,10 +4,11 @@ import java.util.ArrayList;
 
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.domain.DeviceType;
+import com.remotr.subsystem.session.domain.DeviceSession;
 
 public interface DeviceCoordinator {
 	
-	public boolean register(Device device) throws DeviceException;
+	public DeviceSession register(Device device) throws DeviceException;
 	
 	public boolean deregister(Device device) throws DeviceException;
 	
