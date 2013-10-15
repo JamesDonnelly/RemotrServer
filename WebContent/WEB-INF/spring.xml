@@ -13,11 +13,22 @@
 	<bean id="wsCoordinatorService" class="com.remotr.subsystem.ws.WsCoordinatorService" autowire="default" />
 	<bean id="wsCoordinator" class="com.remotr.subsystem.ws.WsCoordinatorDefault">
 	    <property name="responseForwarder" ref="eventCoordinator"/>
+	    <property name="sessionCoordinator" ref="sessionCoordinator" />
+	</bean>
+	
+	<!-- Sessions Subsystem -->
+	<bean id="sessionCoordinator" class="com.remotr.subsystem.session.SessionCoordinatorDefault">
+		<property name="eventCoordinator" ref="eventCoordinator" />
+	</bean>
+		<bean id="sessionCoordinatorService" class="com.remotr.subsystem.session.SessionCoordinatorService">
+		<property name="wsCoordinator" ref="wsCoordinator" />
+		<property name="sessionCoordinator" ref="sessionCoordinator" />
 	</bean>
 	
 	<!-- Device Subsystem -->
 	<bean id="deviceCoordinator" class="com.remotr.subsystem.device.DeviceCoordinatorDefault">
 	    <property name="eventForwarder" ref="eventCoordinator" />
+	    <property name="sessionCoordinator" ref="sessionCoordinator" />
 	</bean>
 	<bean id="deviceCoordinatorWs" class="com.remotr.subsystem.device.DeviceCoordinatorService">
 		<property name="wsCoordinator" ref="wsCoordinator" />
