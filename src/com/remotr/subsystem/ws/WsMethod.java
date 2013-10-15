@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// TODO: Need to add a boolean value so async methods can't be called via rest.
 /**
  * Marker annotation that can be used on methods in a class that implements {@link WsRunner} to indicate that the method can be called via
  * the XMPPWS, TCPWS or the RESTful service.
@@ -30,20 +29,23 @@ public @interface WsMethod {
 	String description() default "No description given";
 	
 	/**
-	 * List of all parameters that are exposed to the WebService. This allows some hidden defaults to be added
-	 * @return
+	 * List of all parameters that are exposed to the WebService.
 	 */
 	WsParam[] wsParams() default {};
 	
 	/**
 	 * Used to exclude the method from being published
-	 * @return
 	 */
 	boolean exclude() default false;
 	
 	/**
-	 * Sets is this is a public WsMethod. Public WsMethods do not require a valid {@link Session}
-	 * @return
+	 * Sets is this is a public WsMethod. Public WsMethods do not require a valid {@link DeviceSession}
 	 */
 	boolean isPublic() default false;
+	
+	/**
+	 * Set this to true if the method is asynchronous. This stops it being accessed via a RESTful call 
+	 * @return
+	 */
+	boolean isAsync() default false;
 }
