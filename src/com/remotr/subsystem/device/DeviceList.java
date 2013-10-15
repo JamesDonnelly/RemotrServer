@@ -205,8 +205,8 @@ class DeviceList {
 	
 	/**
 	 * Gets the device with the id
-	 * @param device
-	 * @return
+	 * @param id
+	 * @return Device
 	 */
 	public Device get(Long id){
 		for(Device d : devices){
