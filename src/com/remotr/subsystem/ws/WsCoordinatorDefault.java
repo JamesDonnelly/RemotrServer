@@ -13,6 +13,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 import com.remotr.core.Main;
 import com.remotr.subsystem.device.domain.Device;
+import com.remotr.subsystem.session.SessionCoordinator;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.WsResponseForwarder;
 import com.remotr.subsystem.ws.response.domain.WsMethodHolder;
@@ -24,8 +25,10 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 // TODO: Service classes should not have to return a WsResponse, but should just return the object to be wrapped -
 // 		 Maybe add the wrapped object type to the response object
 // TODO: Add a message queue to stop this class from becoming overloaded
+// TODO: Use isAsync field in WsMethod to block calls to async methods in Rest.
 public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	private Logger log;
+	private SessionCoordinator sessionCoordinator;
 	private WsResponseForwarder responseForwarder;
 	
 	private Map<String, WsRunner> subsystemMap; // Maps the SubSystem name to it's runner
@@ -43,7 +46,7 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 		publicMethodList = new ArrayList<String>();
 		systemHolders = new ArrayList<WsSubsystemHolder>();
 		
-		log.info("Starting WsManager");
+		log.info("Starting WsCoordinator");
 		
 		this.register(this);
 	}
@@ -52,8 +55,16 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 		this.responseForwarder = responseForwarder;
 	}
 
+	public void setSessionCoordinator(SessionCoordinator sessionCoordinator) {
+		this.sessionCoordinator = sessionCoordinator;
+	}
+
 	@Override
 	public boolean register(WsRunner runner) {
+		if(runner.getSubSystemName() == null || runner.getSubSystemName().equals("")){
+			log.warn("No subsustem name found for last incoming registration - Subsystem will be ignored!");
+			return false;
+		}
 		log.debug("Incoming registration request from ["+runner.getSubSystemName()+"]");
 		if(!subsystemMap.containsKey(runner.getSubSystemName())){
 			WsSubsystemHolder systemHolder = new WsSubsystemHolder();
@@ -62,8 +73,14 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 			systemHolder.setSubsystemName(runner.getSubSystemName());
 			
 			Map<String, Map<String, Class<?>>> methodParamMap = new HashMap<String, Map<String, Class<?>>>();
-			Method[] methods = runner.getClass().getMethods();
 			
+			Class<?> clazz = runner.getClass();
+			WsClass c = AnnotationUtils.findAnnotation(clazz, WsClass.class);
+			if(c != null){
+				systemHolder.setSubsystemDescription(c.description());
+			}
+			
+			Method[] methods = clazz.getMethods();
 			for(Method m : methods){
 				WsMethod a = AnnotationUtils.findAnnotation(m, WsMethod.class);
 				if(a != null && a.exclude() == false){
@@ -78,9 +95,12 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 						publicMethodList.add(m.getName());
 						methodHolder.setPublic(true);
 					}
+					
 					if(!a.description().equals("")){
 						methodHolder.setDescription(a.description());
 					}
+					
+					methodHolder.setAsync(a.isAsync());
 					
 					Map<String, Class<?>> paramMap = new HashMap<String, Class<?>>();
 					if(a.wsParams().length != 0){
@@ -91,7 +111,7 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 						}
 					}
 					methodParamMap.put(m.getName(), paramMap);
-					systemHolder.addWsServiceMethodHolder(methodHolder);
+					systemHolder.addWsMethodHolder(methodHolder);
 				}
 			}
 			systemHolders.add(systemHolder);
@@ -126,6 +146,17 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 			WsRunner runner = subsystemMap.get(wsRequest.getSubSystem().getSubsystemName());
 			
 			try{
+				
+				if(!publicMethodList.contains(wsRequest.getMethod().getMethodName()) && 
+						!sessionCoordinator.validate(wsRequest.getSessionKey())){
+					throw new Exception("Invalid Session");
+				}
+				
+				WsMethodHolder mHolder = getMethodHolder(wsRequest);
+				if(mHolder != null && wsRequest.isRest() && mHolder.isAsync()){
+					throw new Exception("Can not call async method from RESTful service interface.");
+				}
+				
 				Object obj = runRequestOnRunner(wsRequest, runner);
 				
 				if(obj instanceof WsResponse){
@@ -193,6 +224,19 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	@Override
 	public String getSubSystemName() {
 		return "WsCoordinator";
+	}
+	
+	private WsMethodHolder getMethodHolder(WsRequest request){
+		for(WsSubsystemHolder sHolder : systemHolders){
+			if(sHolder.getSubsystemName().equals(request.getSubSystem())){
+				for(WsMethodHolder mHolder : sHolder.getWsMethodList()){
+					if(mHolder.getMethodName().equals(request.getMethod().getMethodName())){
+						return mHolder;
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	private WsResponse getWsResponse(){
