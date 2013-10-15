@@ -7,13 +7,18 @@ import org.apache.log4j.Logger;
 import com.remotr.core.Main;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.domain.DeviceType;
+import com.remotr.subsystem.session.domain.DeviceSession;
 import com.remotr.subsystem.ws.WsBase;
+import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
 import com.remotr.subsystem.ws.WsMethod;
 import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
 import com.remotr.subsystem.ws.response.domain.WsDeviceResponse;
 
+//TODO: Anything modifying devices should check the session key first
+
+@WsClass(description="Handles all device services within Remotr")
 public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	
 	private DeviceCoordinator deviceCoordinator;
@@ -40,7 +45,9 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	public WsDeviceResponse register(Device device) {
 		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
 		try {
-			wsDeviceResponse.setSuccess(deviceCoordinator.register(device));
+			DeviceSession ds = deviceCoordinator.register(device);
+			wsDeviceResponse.setResponse(ds);
+			wsDeviceResponse.setSuccess(true);
 		} catch (DeviceException e) {
 			wsDeviceResponse.setErrorMessage(e.getMessage());
 			log.error("Error during device register from webservice", e);
@@ -50,7 +57,7 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Unregister a device",
 			wsParams = { 
 					@WsParam(name="device", type=Device.class)
@@ -82,7 +89,7 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Get a device by it's ID",
 			wsParams = { 
 					@WsParam(name="id", type=Integer.class),
@@ -101,7 +108,7 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Get all the registered devices"
 			)
 	public WsDeviceResponse getAllRegisteredDevices() {

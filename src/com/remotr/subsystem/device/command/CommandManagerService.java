@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import com.remotr.subsystem.device.DeviceException;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.ws.WsBase;
+import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
 import com.remotr.subsystem.ws.WsMethod;
 import com.remotr.subsystem.ws.WsParam;
@@ -18,6 +19,7 @@ import com.remotr.subsystem.ws.response.domain.WsResponse;
  * @author matt
  *
  */
+@WsClass(description="Manages commands on devices")
 public class CommandManagerService extends WsBase implements WsRunner {
 
 	private CommandManager commandManager;

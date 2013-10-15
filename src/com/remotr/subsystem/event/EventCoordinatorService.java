@@ -12,12 +12,14 @@ import com.remotr.subsystem.device.resource.domain.Resource;
 import com.remotr.subsystem.event.types.Event;
 import com.remotr.subsystem.event.types.EventType;
 import com.remotr.subsystem.ws.WsBase;
+import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
 import com.remotr.subsystem.ws.WsMethod;
 import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
 
+@WsClass(description="Handles all external events and registrations")
 public class EventCoordinatorService extends WsBase implements WsRunner {
 	
 	private Logger log;	
@@ -38,7 +40,7 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Trigger an event",
 			wsParams = { 
 					@WsParam(name="event", type=Event.class)
@@ -59,6 +61,15 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 		return wsResponse;
 	}
 
+	// TODO: Remove device from this method. It should look it up from the session key
+	@WsMethod(
+			isPublic=false,
+			isAsync=true,
+			description="Register a device for a certian event type",
+			wsParams = { 
+					@WsParam(name="device", type=Device.class),
+					@WsParam(name="eventType", type=Event.class)
+			})
 	public WsResponse registerForEvents(Device device, EventType eventType) {
 		log.info("Incoming request to register for events");
 		WsResponse wsResponse = getWsResponseForClass();

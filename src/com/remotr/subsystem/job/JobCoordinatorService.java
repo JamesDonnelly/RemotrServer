@@ -10,12 +10,14 @@ import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.job.domain.JobStatus;
 import com.remotr.subsystem.ws.WsBase;
+import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
 import com.remotr.subsystem.ws.WsMethod;
 import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
 import com.remotr.subsystem.ws.response.domain.WsJobResponse;
 
+@WsClass(description = "Handles job triggering and reporting")
 public class JobCoordinatorService extends WsBase implements WsRunner {
 	
 	private Logger log;
@@ -34,14 +36,14 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Creates a job",
 			wsParams = { 
 					@WsParam(name="command", type=Command.class)
 			})
 	public WsJobResponse createJob(Command command) {
 		log.info("Incoming request to create a new job from command");
-		WsJobResponse jobResponse = getWsJobResponseForClass();
+		WsJobResponse jobResponse = getWsResponseForClass();
 		
 		int jobId = jobCoordinator.createJob(command);
 		jobResponse.setJobId(jobId);
@@ -56,14 +58,14 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 	}
 	
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Executes the given job Id",
 			wsParams = { 
 					@WsParam(name="jobId", type=Integer.class)
 			})
 	public WsJobResponse executeJob(int jobId) {
 		log.info("Incoming request to execute job ["+jobId+"]");
-		WsJobResponse jobResponse = getWsJobResponseForClass();
+		WsJobResponse jobResponse = getWsResponseForClass();
 		
 		try {
 			jobCoordinator.executeJob(jobId);
@@ -76,9 +78,18 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 		return jobResponse;
 	}
 	
+	@WsMethod(
+			isPublic=false,
+			isAsync=true,
+			description="Executes the given job Id and attaches the given device as a listener. "
+					+ "This device will recieve job status updates",
+			wsParams = { 
+					@WsParam(name="jobId", type=Integer.class),
+					@WsParam(name="device", type=Device.class)
+			})
 	public WsJobResponse executeJobWithListener(int jobId, Device device) {
 		log.info("Incoming request to execute job ["+jobId+"]");
-		WsJobResponse jobResponse = getWsJobResponseForClass();
+		WsJobResponse jobResponse = getWsResponseForClass();
 		
 		try {
 			jobCoordinator.executeJob(jobId, device);
@@ -92,14 +103,14 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 	}
 
 	@WsMethod(
-			isPublic=true,
+			isPublic=false,
 			description="Gets the details for the given job",
 			wsParams = { 
 					@WsParam(name="jobId", type=Integer.class)
 			})
 	public WsJobResponse getJobDetail(int jobId) {
 		log.info("Incoming request to get job detail for ["+jobId+"]");
-		WsJobResponse jobResponse = getWsJobResponseForClass();
+		WsJobResponse jobResponse = getWsResponseForClass();
 		
 		try {
 			JobDataMap jdm = jobCoordinator.getJobDataMap(jobId);
@@ -116,7 +127,8 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 		return jobResponse;
 	}
 	
-	private WsJobResponse getWsJobResponseForClass(){
+	@Override
+	protected WsJobResponse getWsResponseForClass(){
 		WsJobResponse jobResponse = new WsJobResponse();
 		jobResponse.setSubSystem(getSubSystemName());
 		jobResponse.setVersionName(Main.getVersionName());
