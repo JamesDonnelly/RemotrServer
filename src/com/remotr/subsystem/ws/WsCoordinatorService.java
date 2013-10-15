@@ -23,6 +23,7 @@ public class WsCoordinatorService extends SpringBeanAutowiringSupport {
 	@Produces(MediaType.TEXT_XML)
 	@Consumes(MediaType.TEXT_XML)
 	public WsResponse runRequest(WsRequest wsRequest) {
+		wsRequest.setRest(true);
 		return wsCoordinator.runRequest(wsRequest);
 	}
 
