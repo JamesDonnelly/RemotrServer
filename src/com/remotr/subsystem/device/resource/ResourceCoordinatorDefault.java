@@ -102,7 +102,7 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 
 	}
 
-	@Override // TODO: React to device deregister
+	@Override
 	public void onEvent(Event event) {
 		if(event.getEventType().equals(EventType.DEVICE_REGISTER) || 
 				event.getEventType().equals(EventType.DEVICE_UPDATE) || 
