@@ -197,9 +197,9 @@
 			<formatter type="brief" usefile="false" />
 			<formatter type="xml"/>
 			<batchtest todir="${reports.dir}">
-				<fileset dir="${bin.dir}/test">
-					<include name="**/*Test*" />
-				</fileset>
+				<fileset dir="${bin.dir}/test" 
+					includes="**/*Test*"
+					excludes="**/*$*.class" />
 			</batchtest>
 		</junit>
 		<antcall target="remove-after-fail" />
