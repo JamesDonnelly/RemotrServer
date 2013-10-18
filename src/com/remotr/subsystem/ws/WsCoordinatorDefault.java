@@ -107,7 +107,7 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 						for(int i=0; i < a.wsParams().length; i++){
 							log.debug("Method ["+m.getName()+"] takes param ["+a.wsParams()[i].name()+"] of type ["+a.wsParams()[i].type().getSimpleName()+"]");
 							paramMap.put(a.wsParams()[i].name(), a.wsParams()[i].type());
-							methodHolder.addWsRequestParam(a.wsParams()[i].name(), a.wsParams()[i].type().getSimpleName());;
+							methodHolder.addWsParam(a.wsParams()[i].name(), a.wsParams()[i].type().getSimpleName());;
 						}
 					}
 					methodParamMap.put(m.getName(), paramMap);
@@ -186,12 +186,12 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	}
 	
 	private Object runRequestOnRunner(WsRequest request, WsRunner runner) throws Exception {
-		if(request.getMethod().getWsRequestParamList() != null){
+		if(request.getMethod().getWsParamList() != null){
 			Map<String, Class<?>> paramMap = methodMap.get(runner.getSubSystemName()).get(request.getMethod().getMethodName());
 			
 			ArrayList<Object> paramObjects = new ArrayList<Object>();
 			List<Class<?>> classList = new ArrayList<Class<?>>();
-			for(WsParamHolder p : request.getMethod().getWsRequestParamList()){
+			for(WsParamHolder p : request.getMethod().getWsParamList()){
 				if(paramMap.containsKey(p.getName())){
 					Class<?> clazz = paramMap.get(p.getName());
 					JAXBElement<?> element = (JAXBElement<?>) p.getValue();
