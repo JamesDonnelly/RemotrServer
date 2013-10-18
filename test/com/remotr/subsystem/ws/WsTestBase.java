@@ -16,7 +16,7 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
  * @author matt
  *
  */
-public class WsTestBase {
+public abstract class WsTestBase {
 	
 	protected static String WSGET_SUBSYSTEMS = "getSubSystems";
 	
