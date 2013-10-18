@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
+import org.junit.Ignore;
+
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.domain.DeviceType;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
@@ -16,6 +18,7 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
  * @author matt
  *
  */
+@Ignore
 public abstract class WsTestBase {
 	
 	protected static String WSGET_SUBSYSTEMS = "getSubSystems";
