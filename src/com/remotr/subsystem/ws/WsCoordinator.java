@@ -28,8 +28,14 @@ public interface WsCoordinator {
 	 * @param wsRequest
 	 * @param device
 	 */
-	public void runRequest(WsRequest wsRequest, Device device);
+	public void runRequest(final WsRequest wsRequest, final Device device);
 	
+	/**
+	 * Runs the given {@link WsRequest} and returns the result via the {@link WsResponseReceiver}
+	 * @param wsRequest
+	 * @param responseReceiver
+	 */
+	public void runRequest(final WsRequest wsRequest, final WsResponseReceiver responseReceiver);
 	
 	/**
 	 * Runs the given {@link WsRequest} and returns the result. 
@@ -37,6 +43,7 @@ public interface WsCoordinator {
 	 * @return {@link WsResponse}
 	 */
 	public WsResponse runRequest(WsRequest wsRequest);
+	
 	
 	/**
 	 * Returns the WsCoordinators internal subsystem name

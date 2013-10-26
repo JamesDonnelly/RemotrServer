@@ -1,5 +1,6 @@
 package com.remotr.subsystem.ws;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,10 @@ import org.springframework.core.annotation.AnnotationUtils;
 import com.remotr.core.Main;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.session.SessionCoordinator;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
+import com.remotr.subsystem.ws.annotations.WsSessionKey;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.WsResponseForwarder;
 import com.remotr.subsystem.ws.response.domain.WsMethodHolder;
@@ -25,7 +30,6 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 // TODO: Service classes should not have to return a WsResponse, but should just return the object to be wrapped -
 // 		 Maybe add the wrapped object type to the response object
 // TODO: Add a message queue to stop this class from becoming overloaded
-// TODO: Use isAsync field in WsMethod to block calls to async methods in Rest.
 public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	private Logger log;
 	private SessionCoordinator sessionCoordinator;
@@ -62,10 +66,11 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	@Override
 	public boolean register(WsRunner runner) {
 		if(runner.getSubSystemName() == null || runner.getSubSystemName().equals("")){
-			log.warn("No subsustem name found for last incoming registration - Subsystem will be ignored!");
+			log.warn("No subsustem name found for last incoming registration - Subsystem is being ignored");
 			return false;
 		}
 		log.debug("Incoming registration request from ["+runner.getSubSystemName()+"]");
+		
 		if(!subsystemMap.containsKey(runner.getSubSystemName())){
 			WsSubsystemHolder systemHolder = new WsSubsystemHolder();
 			// We haven't seen this runner before - Add it to the map then get it's published methods
@@ -133,14 +138,39 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	public WsResponse runRequest(WsRequest wsRequest) {
 		return runRequestInternal(wsRequest, null);
 	}
+	
+	@Override
+	public void runRequest(final WsRequest wsRequest, final WsResponseReceiver responseReceiver) {
+		Thread t = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				WsResponse response = runRequest(wsRequest);
+				responseReceiver.onResponse(response);
+			}
+			
+		});
+		
+		t.start();
+	}
 
 	@Override
-	public void runRequest(WsRequest wsRequest, Device device) {
-		runRequestInternal(wsRequest, device);
+	public void runRequest(final WsRequest wsRequest, final Device device) {
+		Thread t = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				runRequestInternal(wsRequest, device);
+			}
+			
+		});
+		
+		t.start();
 	}
 	
 	private WsResponse runRequestInternal(WsRequest wsRequest, Device device){
 		WsResponse response = getWsResponse();
+		log.debug("Starting ws run request for ["+wsRequest.getReference()+"]");
 		
 		if(subsystemMap.containsKey(wsRequest.getSubSystem().getSubsystemName())){
 			WsRunner runner = subsystemMap.get(wsRequest.getSubSystem().getSubsystemName());
@@ -150,6 +180,9 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 				if(!publicMethodList.contains(wsRequest.getMethod().getMethodName()) && 
 						!sessionCoordinator.validate(wsRequest.getSessionKey())){
 					throw new Exception("Invalid Session");
+				}else if(!publicMethodList.contains(wsRequest.getMethod().getMethodName()) && 
+						sessionCoordinator.validate(wsRequest.getSessionKey())){
+					setSessionKeyOnRunner(runner, wsRequest);
 				}
 				
 				WsMethodHolder mHolder = getMethodHolder(wsRequest);
@@ -200,13 +233,29 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 					classList.add(clazz);
 				}
 			}
-			
+
 			Method method = runner.getClass().getMethod(request.getMethod().getMethodName(), classList.toArray(new Class[classList.size()]));
 			return method.invoke(runner, paramObjects.toArray());
 		}else{
 			Method method = runner.getClass().getMethod(request.getMethod().getMethodName());
 			return method.invoke(runner);
 		}
+	}
+	
+	private void setSessionKeyOnRunner(WsRunner runner, WsRequest request){
+		log.debug("Setting SessionKey on runner");
+		final Field[] fields = runner.getClass().getDeclaredFields();
+	    for (final Field field : fields) {
+	        final WsSessionKey fieldAnnotation = field.getAnnotation(WsSessionKey.class);
+	        if(fieldAnnotation!=null){
+	            try {
+	            	field.setAccessible(true);
+					field.set(runner, request.getSessionKey());
+				} catch(Exception e){
+					log.error("Error setting session key on runner - Call may fail");
+				}
+	        }
+	    }
 	}
 	
 	@WsMethod(
@@ -218,6 +267,20 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 		
 		response.setSubsystemList(systemHolders);
 		response.setSuccess(true);
+		return response;
+	}
+	
+	@WsMethod(
+			isPublic=true,
+			description="Echo the object back with the default fields filled",
+			wsParams = { 
+				@WsParam(name="echoObject", type=Object.class)
+			})
+	public WsResponse echo(Object echoObject){
+		WsResponse response = getWsResponse();
+		response.setResponse(echoObject);
+		response.setSuccess(true);
+		
 		return response;
 	}
 
