@@ -19,6 +19,7 @@
 	<!-- Sessions Subsystem -->
 	<bean id="sessionCoordinator" class="com.remotr.subsystem.session.SessionCoordinatorDefault">
 		<property name="eventCoordinator" ref="eventCoordinator" />
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
 	</bean>
 		<bean id="sessionCoordinatorService" class="com.remotr.subsystem.session.SessionCoordinatorService">
 		<property name="wsCoordinator" ref="wsCoordinator" />
@@ -57,13 +58,17 @@
 	    <property name="requestManager" ref="wsCoordinator" />
 	    <property name="eventCoordinator" ref="eventCoordinator" />
 	</bean>
-
+	
+	<!-- Ws Sockets -->
+	<bean id="wsSocketCoordinator" class="com.remotr.subsystem.websocket.WsSocketCoordinatorDefault" />
+ 
 	<!-- Event Subsystem -->
 	<bean id="eventCoordinator" class="com.remotr.subsystem.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
 		<property name="tcpWsSender" ref="tcpCoordinator" />
 		<property name="xmppWsSender" ref="xmppCoordinator" />
+		<property name="wsSocketSender" ref="wsSocketCoordinator" />
 	</bean>
 	<bean id="eventCoordinatorWs" class="com.remotr.subsystem.event.EventCoordinatorService">
 		<property name="eventCoordinator" ref="eventCoordinator"/>
@@ -81,6 +86,7 @@
 	<bean id="jobCoordinatorWs" class="com.remotr.subsystem.job.JobCoordinatorService">
 		<property name="wsCoordinator" ref="wsCoordinator" />
 		<property name="jobCoordinator" ref="jobCoordinator" />
+		<property name="deviceCoordinator" ref="deviceCoordinator" />
 	</bean>
 
 </beans>
