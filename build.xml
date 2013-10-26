@@ -12,7 +12,7 @@
 	<property name="doc.dir" location="${basedir}/doc" />
 	<property name="reports.dir" location="${basedir}/reports" />
 	<property name="test.dir" location="${basedir}/test" />
-	<property name="deploy.dir" value="/usr/local/jboss/standalone/deployments" />
+	<property name="deploy.dir" value="/Users/matt/Documents/workspace/jetty/webapps" />
 	
 	<property name="debug" value="true" />
 
@@ -136,12 +136,13 @@
 
 	<target name="compile" depends="remove-bin, init, resolve, build">
 		<echo message="Building source" />
+		<echo message="Ant running on Java version ${ant.java.version}"/>
 		<echo message="Using base dir ${basedir}" />
 		<echo message="Using RemotrUtil dir ${ru.dir}" />
 		<echo message="Using Classpath: ${lib.classpath.string}" />
 		<javac srcdir="${source.dir};${ru.src.dir}" destdir="${bin.dir}" debug="true"
-			debuglevel="lines,vars,source" source="1.6" target="1.6" encoding="UTF-8"
-			includeantruntime="true">
+			debuglevel="lines,vars,source" source="1.7" target="1.7" encoding="UTF-8"
+			includeantruntime="false">
 			<classpath refid="lib.classpath" />
 		</javac>
 	</target>
@@ -220,6 +221,11 @@
 		<copy file="${webcontent.dir}/WEB-INF/spring.xml" todir="${dist.dir}" overwrite="true" />
 		<echo message="Copying release notes to dist" />
 		<copy file="${basedir}/Remotr.txt" todir="${dist.dir}" overwrite="true" />
+	</target>
+	
+	<target name="jetty-deploy" description="Deploys the war file to the local jetty instal" depends="release">
+		<echo message="Copying war to webapp folder" />
+		<copy file="${dist.dir}/remotr.war" todir="${deploy.dir}" overwrite="true" />
 	</target>
 
 </project>
