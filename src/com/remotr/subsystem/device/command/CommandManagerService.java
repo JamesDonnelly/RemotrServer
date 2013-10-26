@@ -7,11 +7,11 @@ import org.apache.log4j.Logger;
 import com.remotr.subsystem.device.DeviceException;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.ws.WsBase;
-import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
-import com.remotr.subsystem.ws.WsMethod;
-import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
 
 /**
@@ -44,7 +44,7 @@ public class CommandManagerService extends WsBase implements WsRunner {
 			})
 	public WsResponse triggerCommand(Device device) {
 		log.info("Incoming request to trigger command");
-		WsResponse wsResponse = getWsResponseForClass();
+		WsResponse wsResponse = getWsResponse();
 		try {
 			commandManager.triggerCommand(device);
 		} catch (IllegalArgumentException e) {
