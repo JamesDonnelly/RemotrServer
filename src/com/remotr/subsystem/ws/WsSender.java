@@ -11,13 +11,13 @@ public interface WsSender {
 	 * @param wsResponse
 	 * @return
 	 */
-	public Boolean sendMessage(Device device, WsResponse wsResponse);
+	public Boolean sendResponse(Device device, WsResponse wsResponse);
 	
 	/**
 	 * Send a {@link WsResponse} to all registered device servers
 	 * @param wsResponse
 	 * @return
 	 */
-	public void sendMessage(WsResponse wsResponse);
+	public void sendResponse(WsResponse wsResponse);
 
 }

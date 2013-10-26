@@ -9,5 +9,6 @@ package com.remotr.subsystem.ws;
  */
 public interface WsRunner {
 	
-	public String getSubSystemName();	
+	public String getSubSystemName();
+	
 }

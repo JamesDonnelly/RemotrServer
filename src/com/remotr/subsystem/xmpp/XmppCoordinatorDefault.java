@@ -145,7 +145,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	}
 	
 	@Override
-	public void sendMessage(WsResponse wsResponse) {
+	public void sendResponse(WsResponse wsResponse) {
 		log.debug("Adding WsResponse from ["+wsResponse.getSubSystem()+"] to queue for all devices");
 		synchronized (messageManagerQueue) {
 			try{
@@ -161,7 +161,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	}
 	
 	@Override
-	public Boolean sendMessage(Device device, WsResponse wsResponse) {
+	public Boolean sendResponse(Device device, WsResponse wsResponse) {
 		log.debug("Adding WsResponse from ["+wsResponse.getSubSystem()+"] to queue for device ["+device.getName()+"]");
 		synchronized (messageManagerDevice) {
 			try{
@@ -260,7 +260,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 		wsResponse.setSubSystem(this.getClass().getSimpleName());
 		wsResponse.setSuccess(true);
 		
-		sendMessage(device, wsResponse);
+		sendResponse(device, wsResponse);
 	}
 	
 	private XmppMessageServer getMessageManagerForDevice(Device device){

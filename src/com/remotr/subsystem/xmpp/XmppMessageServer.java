@@ -102,7 +102,7 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 				response.setReference(event.getRefference());
 				response.setSubSystem("XmppCoordinator");
 				response.setSuccess(true);
-				xmppCoordinator.sendMessage(device, response);
+				xmppCoordinator.sendResponse(device, response);
 			}
 			
 		} catch (JAXBException e) {
@@ -174,7 +174,7 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 		WsResponse response = new WsResponse();
 		response.setSubSystem("XmppCoordinator");
 		response.setErrorMessage(msg);
-		xmppCoordinator.sendMessage(device, response);				
+		xmppCoordinator.sendResponse(device, response);				
 	}
 	
 	private void shutdownAndCleanUp(){
