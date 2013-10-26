@@ -1,9 +1,11 @@
-package com.remotr.subsystem.ws;
+package com.remotr.subsystem.ws.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.remotr.subsystem.ws.WsRunner;
 
 /**
  * Marker annotation that can be used on methods in a class that implements {@link WsRunner} to indicate that the method can be called via
