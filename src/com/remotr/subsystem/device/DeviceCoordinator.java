@@ -23,6 +23,10 @@ public interface DeviceCoordinator {
 	public Device getDeviceByPos(int id) throws DeviceException;
 	
 	public Device getDeviceById(Long id) throws DeviceException;
+	
+	public Device getDeviceBySession(DeviceSession dSession) throws DeviceException;
+	
+	public Device getDeviceBySessionKey(String sessionKey) throws DeviceException;
 
 	public ArrayList<Device> getAllRegisteredDevices();
 	

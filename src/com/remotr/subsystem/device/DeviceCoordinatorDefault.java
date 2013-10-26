@@ -136,17 +136,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				device.setSessionKey(deviceSession.getSessionKey());
 				
 				log.info("Device ["+device.getName()+"] registered");
-				
-				DeviceEvent event = new DeviceEvent();
-				event.setEventType(EventType.DEVICE_REGISTER);
-				event.setName("DeviceRegistered");
-				event.setDeviceName(device.getName());
-				event.setDeviceType(device.getType());
+		
+				DeviceEvent event = createDeviceEvent("DeviceRegistered", device, EventType.DEVICE_REGISTER);
 				eventForwarder.forwardEvent(event);
 				
 				return deviceSession;
 			}catch(HibernateException he){
 				log.error("Error persisting Device ["+device.getName()+"]", he);
+				triggerRecache();
 				throw new DeviceException("Error persisting Device ["+device.getName()+"]");
 			}finally{
 				if(session.isOpen()) session.close(); // Check first as it may be closed after calling updateDevice()
@@ -283,6 +280,24 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			throw new DeviceException(message);
 		}
 	}
+	
+	@Override
+	public Device getDeviceBySession(DeviceSession dSession) throws DeviceException {
+		return getDeviceBySessionKey(dSession.getSessionKey());
+	}
+	
+	@Override
+	public Device getDeviceBySessionKey(String sessionKey) throws DeviceException {
+		if(sessionKey != null && sessionCoordinator.validate(sessionKey)){
+			for(Device d : getAllRegisteredDevices()){
+				if(d.getSessionKey() != null && d.getSessionKey().equals(sessionKey)){
+					return d;
+				}
+			}
+		}
+		
+		throw new DeviceException("Device not active or registered");
+	}
 
 	@Override
 	public ArrayList<Device> getAllRegisteredDevices() {
@@ -323,6 +338,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				}
 			}
 			log.info("Finished getting persisted devices from database");
+			
+			DeviceEvent event = createDeviceEvent("DeviceRecache", this.getSystemDevice(), EventType.DEVICE_UPDATE);
+			eventForwarder.forwardEvent(event);
+			
 		}catch(Exception e){
 			log.error("Error restoring persisted devices", e);
 			log.error("Panicing - Removing all devices from device list (List currently holds ["+deviceCache.size()+"] devices)");
