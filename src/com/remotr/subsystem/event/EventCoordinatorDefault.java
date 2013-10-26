@@ -36,6 +36,7 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	private Logger log;
 	private WsSender tcpWsSender;
 	private WsSender xmppWsSender;
+	private WsSender wsSocketSender;
 	private DeviceCoordinator deviceCoordinator;
 	private ResourceCoordinator resourceCoordinator;
 	
@@ -65,6 +66,10 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 
 	public void setXmppWsSender(WsSender xmppWsSender) {
 		this.xmppWsSender = xmppWsSender;
+	}
+
+	public void setWsSocketSender(WsSender wsSocketSender) {
+		this.wsSocketSender = wsSocketSender;
 	}
 
 	protected String getSubsystem(){
@@ -156,7 +161,8 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 			Resource resource = getResourceFromCoordinator(event.getResource());
 			if(event != null && !event.getName().isEmpty() && resource != null){
 				log.info("Forwarding Event >> ["+event.getName()+"]");
-				cacheEvent(event);
+				int cahcedId = cacheEvent(event);
+				event.setId(cahcedId);
 				if(event.getEventType() == EventType.BROADCAST){
 					log.debug("Event ["+event.getName()+"] is a broadcast event");
 					handleBroadcastEvent(event);
@@ -289,15 +295,20 @@ public class EventCoordinatorDefault implements EventCoordinator, JobForwarder, 
 	
 	private void sendMessage(Device device, WsResponse wsResponse){
 		if(device.getConnectionType() == ConnectionType.TCPWS){
-			tcpWsSender.sendMessage(device, wsResponse);
+			tcpWsSender.sendResponse(device, wsResponse);
+		}else if(device.getConnectionType() == ConnectionType.XMPP){
+			xmppWsSender.sendResponse(device, wsResponse);
+		}else if(device.getConnectionType() == ConnectionType.WSOCKET){
+			wsSocketSender.sendResponse(device, wsResponse);
 		}else{
-			xmppWsSender.sendMessage(device, wsResponse);
+			log.error("None or no connection type found on the device ["+device.getName()+"]. WsResponse can not be sent");
 		}
 	}
 	
 	private void sendMessage(WsResponse wsResponse){
-		tcpWsSender.sendMessage(wsResponse);
-		xmppWsSender.sendMessage(wsResponse);
+		tcpWsSender.sendResponse(wsResponse);
+		xmppWsSender.sendResponse(wsResponse);
+		wsSocketSender.sendResponse(wsResponse);
 	}
 	
 }

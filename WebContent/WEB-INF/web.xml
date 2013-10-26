@@ -4,6 +4,7 @@
   <listener>
   	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
+  
   <servlet>
     <servlet-name>Remotr</servlet-name>
     <servlet-class>com.remotr.core.Main</servlet-class>
@@ -18,6 +19,7 @@
     <!--param-value>file:/home/matt/remotr/config/spring.xml</param-value-->
     <param-value>/WEB-INF/spring.xml</param-value>
  </context-param>
+ 
  <servlet>
     <servlet-name>RemotrWs</servlet-name>
    	<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -31,4 +33,15 @@
     <servlet-name>RemotrWs</servlet-name>
     <url-pattern>/ws/*</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>RemotrWsSocket</servlet-name>
+   	<servlet-class>com.remotr.subsystem.websocket.WsSocketCoordinatorDefault</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RemotrWsSocket</servlet-name>
+    <url-pattern>/wsocket/*</url-pattern>
+  </servlet-mapping>
+  
 </web-app>
