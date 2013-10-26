@@ -11,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.remotr.subsystem.session.SessionCoordinator;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.WsResponseForwarder;
 import com.remotr.subsystem.ws.response.domain.WsMethodHolder;
@@ -176,7 +179,7 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 	}
 	
 	@WsClass(description="This is a test class")
-	class TestRunnerClass implements WsRunner {
+	static class TestRunnerClass implements WsRunner {
 		private WsCoordinator wsCoordinator;
 		
 		public TestRunnerClass(WsCoordinator wsCoordinator){
