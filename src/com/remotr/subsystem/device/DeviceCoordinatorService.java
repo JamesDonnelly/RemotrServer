@@ -9,11 +9,12 @@ import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.domain.DeviceType;
 import com.remotr.subsystem.session.domain.DeviceSession;
 import com.remotr.subsystem.ws.WsBase;
-import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
-import com.remotr.subsystem.ws.WsMethod;
-import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
+import com.remotr.subsystem.ws.annotations.WsSessionKey;
 import com.remotr.subsystem.ws.response.domain.WsDeviceResponse;
 
 //TODO: Anything modifying devices should check the session key first
@@ -24,6 +25,9 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 	private DeviceCoordinator deviceCoordinator;
 	private WsCoordinator wsCoordinator;
 	private Logger log;
+	
+	@WsSessionKey
+	private String sessionKey;
 	
 	public DeviceCoordinatorService() {
 		log = Logger.getLogger(getClass());
@@ -58,17 +62,18 @@ public class DeviceCoordinatorService extends WsBase implements WsRunner {
 
 	@WsMethod(
 			isPublic=false,
-			description="Unregister a device",
-			wsParams = { 
-					@WsParam(name="device", type=Device.class)
-			})
-	public WsDeviceResponse deregister(Device device) {
+			description="Unregister a device"
+			)
+	public WsDeviceResponse deregister() {
 		WsDeviceResponse wsDeviceResponse = getDeviceResponseForClass();
-		try {
-			wsDeviceResponse.setSuccess(deviceCoordinator.deregister(device));
-		} catch (DeviceException e) {
-			wsDeviceResponse.setErrorMessage(e.getMessage());
-			log.error("Error during device register from webservice", e);
+		if(sessionKey != null){
+			try {
+				Device device = deviceCoordinator.getDeviceBySessionKey(sessionKey);
+				wsDeviceResponse.setSuccess(deviceCoordinator.deregister(device));
+			} catch (DeviceException e) {
+				wsDeviceResponse.setErrorMessage(e.getMessage());
+				log.error("Error during device register from webservice", e);
+			}
 		}
 		
 		return wsDeviceResponse;

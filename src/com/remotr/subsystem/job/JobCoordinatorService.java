@@ -7,14 +7,16 @@ import org.quartz.JobDataMap;
 
 import com.remotr.core.Main;
 import com.remotr.device.command.domain.Command;
+import com.remotr.subsystem.device.DeviceCoordinator;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.job.domain.JobStatus;
 import com.remotr.subsystem.ws.WsBase;
-import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
-import com.remotr.subsystem.ws.WsMethod;
-import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
+import com.remotr.subsystem.ws.annotations.WsSessionKey;
 import com.remotr.subsystem.ws.response.domain.WsJobResponse;
 
 @WsClass(description = "Handles job triggering and reporting")
@@ -23,6 +25,10 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 	private Logger log;
 	private JobCoordinator jobCoordinator;
 	private WsCoordinator wsCoordinator;
+	private DeviceCoordinator deviceCoordinator;
+	
+	@WsSessionKey
+	private String sessionKey;
 	
 	public JobCoordinatorService(){
 		log = Logger.getLogger(this.getClass());
@@ -43,7 +49,7 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 			})
 	public WsJobResponse createJob(Command command) {
 		log.info("Incoming request to create a new job from command");
-		WsJobResponse jobResponse = getWsResponseForClass();
+		WsJobResponse jobResponse = getWsResponse();
 		
 		int jobId = jobCoordinator.createJob(command);
 		jobResponse.setJobId(jobId);
@@ -65,7 +71,7 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 			})
 	public WsJobResponse executeJob(int jobId) {
 		log.info("Incoming request to execute job ["+jobId+"]");
-		WsJobResponse jobResponse = getWsResponseForClass();
+		WsJobResponse jobResponse = getWsResponse();
 		
 		try {
 			jobCoordinator.executeJob(jobId);
@@ -84,14 +90,14 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 			description="Executes the given job Id and attaches the given device as a listener. "
 					+ "This device will recieve job status updates",
 			wsParams = { 
-					@WsParam(name="jobId", type=Integer.class),
-					@WsParam(name="device", type=Device.class)
+					@WsParam(name="jobId", type=Integer.class)
 			})
-	public WsJobResponse executeJobWithListener(int jobId, Device device) {
+	public WsJobResponse executeJobWithListener(int jobId) {
 		log.info("Incoming request to execute job ["+jobId+"]");
-		WsJobResponse jobResponse = getWsResponseForClass();
+		WsJobResponse jobResponse = getWsResponse();
 		
 		try {
+			Device device = deviceCoordinator.getDeviceBySessionKey(sessionKey);
 			jobCoordinator.executeJob(jobId, device);
 			jobResponse.setSuccess(true);
 		} catch (Exception e) {
@@ -110,7 +116,7 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 			})
 	public WsJobResponse getJobDetail(int jobId) {
 		log.info("Incoming request to get job detail for ["+jobId+"]");
-		WsJobResponse jobResponse = getWsResponseForClass();
+		WsJobResponse jobResponse = getWsResponse();
 		
 		try {
 			JobDataMap jdm = jobCoordinator.getJobDataMap(jobId);
@@ -128,7 +134,7 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 	}
 	
 	@Override
-	protected WsJobResponse getWsResponseForClass(){
+	protected WsJobResponse getWsResponse(){
 		WsJobResponse jobResponse = new WsJobResponse();
 		jobResponse.setSubSystem(getSubSystemName());
 		jobResponse.setVersionName(Main.getVersionName());
@@ -147,6 +153,10 @@ public class JobCoordinatorService extends WsBase implements WsRunner {
 
 	public void setWsCoordinator(WsCoordinator wsCoordinator) {
 		this.wsCoordinator = wsCoordinator;
+	}
+
+	public void setDeviceCoordinator(DeviceCoordinator deviceCoordinator) {
+		this.deviceCoordinator = deviceCoordinator;
 	}
 	
 }

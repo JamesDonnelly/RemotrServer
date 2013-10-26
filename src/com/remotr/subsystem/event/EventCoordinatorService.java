@@ -12,11 +12,12 @@ import com.remotr.subsystem.device.resource.domain.Resource;
 import com.remotr.subsystem.event.types.Event;
 import com.remotr.subsystem.event.types.EventType;
 import com.remotr.subsystem.ws.WsBase;
-import com.remotr.subsystem.ws.WsClass;
 import com.remotr.subsystem.ws.WsCoordinator;
-import com.remotr.subsystem.ws.WsMethod;
-import com.remotr.subsystem.ws.WsParam;
 import com.remotr.subsystem.ws.WsRunner;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
+import com.remotr.subsystem.ws.annotations.WsSessionKey;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
 
 @WsClass(description="Handles all external events and registrations")
@@ -27,6 +28,9 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 	private DeviceCoordinator deviceCoordinator;
 	private ResourceCoordinator resourceCoordinator;
 	private WsCoordinator wsCoordinator;
+	
+	@WsSessionKey
+	private String sessionKey;
 	
 	public EventCoordinatorService(){
 		log = Logger.getLogger(this.getClass());
@@ -47,7 +51,7 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 			})
 	public WsResponse sendEvent(Event event) {
 		log.info("Incoming request to forward new event");
-		WsResponse wsResponse = getWsResponseForClass();
+		WsResponse wsResponse = getWsResponse();
 		try{
 			Resource resource = resourceCoordinator.getResource(event.getResource());
 			if(resource != null){
@@ -61,19 +65,18 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 		return wsResponse;
 	}
 
-	// TODO: Remove device from this method. It should look it up from the session key
 	@WsMethod(
 			isPublic=false,
 			isAsync=true,
 			description="Register a device for a certian event type",
 			wsParams = { 
-					@WsParam(name="device", type=Device.class),
 					@WsParam(name="eventType", type=Event.class)
 			})
-	public WsResponse registerForEvents(Device device, EventType eventType) {
+	public WsResponse registerForEvents(EventType eventType) {
 		log.info("Incoming request to register for events");
-		WsResponse wsResponse = getWsResponseForClass();
+		WsResponse wsResponse = getWsResponse();
 		try{
+			Device device = deviceCoordinator.getDeviceBySessionKey(sessionKey);
 			device = deviceCoordinator.getDevice(device);
 			if(device != null){
 				wsResponse.setSuccess(eventCoordinator.registerForEvents(device, eventType));
@@ -93,7 +96,7 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 			})
 	public WsResponse getEvents(Resource resource) {
 		log.info("Incoming request to get events");
-		WsResponse wsResponse = getWsResponseForClass();
+		WsResponse wsResponse = getWsResponse();
 		try{
 			resource = resourceCoordinator.getResource(resource);
 			if(resource != null){
