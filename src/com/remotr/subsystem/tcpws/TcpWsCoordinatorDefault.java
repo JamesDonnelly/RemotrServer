@@ -151,7 +151,7 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 	}
 
 	@Override
-	public Boolean sendMessage(Device device, WsResponse wsResponse) {
+	public Boolean sendResponse(Device device, WsResponse wsResponse) {
 		log.debug("Adding WsResponse from ["+wsResponse.getSubSystem()+"] to queue for device ["+device.getName()+"]");
 		synchronized (serverDevice) {
 			try{
@@ -177,7 +177,7 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 	}
 
 	@Override
-	public void sendMessage(WsResponse wsResponse) {
+	public void sendResponse(WsResponse wsResponse) {
 		log.debug("Adding WsResponse from ["+wsResponse.getSubSystem()+"] to queue for all devices");
 		synchronized (serverQueue) {
 			try{
@@ -198,7 +198,7 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 		wsResponse.setSubSystem(this.getClass().getName());
 		wsResponse.setSuccess(true);
 		
-		sendMessage(device, wsResponse);
+		sendResponse(device, wsResponse);
 	}
 
 	@Override
@@ -207,6 +207,6 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 		wsResponse.setSubSystem("Ping");
 		wsResponse.setSuccess(true);
 		
-		sendMessage(device, wsResponse);		
+		sendResponse(device, wsResponse);		
 	}
 }
