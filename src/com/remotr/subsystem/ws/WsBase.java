@@ -6,6 +6,7 @@ import com.remotr.core.Main;
 import com.remotr.subsystem.ws.annotations.WsMethod;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
+import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 
 /**
  * Base abstract class for all classes exposing {@link WsMethod}s to extend. 
@@ -45,6 +46,16 @@ public abstract class WsBase {
 		r.createSubsystemHolder(request);
 		
 		return r;
+	}
+	
+	protected WsSubsystemResponse getWsSubsystemResponse() {
+		WsSubsystemResponse response = new WsSubsystemResponse();
+		response.setSubSystem(subSystemName);
+		
+		response.setVersionName(Main.getVersionName());
+		response.setVersionNum(Main.getVersionNumber());
+		
+		return response;
 	}
 	
 }
