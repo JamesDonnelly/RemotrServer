@@ -20,6 +20,7 @@ local.properties
 .loadpath
 .springbeans
 reports/
+XML Examples/
 
 # External tool builders
 .externalToolBuilders/
