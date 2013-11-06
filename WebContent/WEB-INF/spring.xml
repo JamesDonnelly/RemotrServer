@@ -56,7 +56,7 @@
 	</bean>
 	
 	<!-- XMPP SubSystem -->
-	<bean id="xmppCoordinator" class="com.remotr.subsystem.xmpp.XmppCoordinatorDefault">
+	<bean id="xmppManager" class="com.remotr.subsystem.xmpp.XmppManagerDefault">
 	    <constructor-arg name="xmppServerAddress" value="192.168.1.1" />
 	    <constructor-arg name="deviceCoordinator" ref="deviceCoordinator" />
 	    <property name="requestManager" ref="wsCoordinator" />
@@ -64,16 +64,17 @@
 	</bean>
 	
 	<!-- Ws Sockets -->
-	<bean id="wsSocketCoordinator" class="com.remotr.subsystem.websocket.WsSocketCoordinatorDefault" />
+	<bean id="wsSocketManager" class="com.remotr.subsystem.websocket.WsSocketManagerDefault" />
  
 	<!-- Event Subsystem -->
 	<bean id="eventCoordinator" class="com.remotr.subsystem.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
 		<property name="tcpWsSender" ref="tcpManager" />
-		<property name="xmppWsSender" ref="xmppCoordinator" />
-		<property name="wsSocketSender" ref="wsSocketCoordinator" />
+		<property name="xmppWsSender" ref="xmppManager" />
+		<property name="wsSocketSender" ref="wsSocketManager" />
 	</bean>
+	
 	<bean id="eventCoordinatorWs" class="com.remotr.subsystem.event.EventCoordinatorService">
 		<property name="eventCoordinator" ref="eventCoordinator"/>
 		<property name="deviceCoordinator" ref="deviceCoordinator"/>
