@@ -1,43 +1,102 @@
 package com.remotr.subsystem.ws;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.apache.log4j.Logger;
 
-import com.remotr.subsystem.ws.request.domain.WsRequest;
+import com.remotr.subsystem.event.EventForwarder;
+import com.remotr.subsystem.event.types.Event;
+import com.remotr.subsystem.event.types.EventType;
+import com.remotr.subsystem.ws.annotations.WsClass;
+import com.remotr.subsystem.ws.annotations.WsMethod;
+import com.remotr.subsystem.ws.annotations.WsParam;
+import com.remotr.subsystem.ws.annotations.WsSessionKey;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
+import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 
-@Path("ws")
-public class WsCoordinatorService extends SpringBeanAutowiringSupport {
+@WsClass(description="Handles all helper web services within Remotr")
+public class WsCoordinatorService extends WsBase implements WsRunner{
 	
-	@Autowired
 	private WsCoordinator wsCoordinator;
-
-	@POST
-	@Produces(MediaType.TEXT_XML)
-	@Consumes(MediaType.TEXT_XML)
-	public WsResponse runRequest(WsRequest wsRequest) {
-		wsRequest.setRest(true);
-		return wsCoordinator.runRequest(wsRequest);
+	private EventForwarder eventForwarder;
+	private Logger log;
+	
+	@WsSessionKey
+	private String sessionKey;
+	
+	public WsCoordinatorService() {
+		log = Logger.getLogger(getClass());
+		subSystemName = "Service";
+		log.info("Starting new Web Service WebService");
+	}
+	
+	@PostConstruct
+	public void init(){
+		wsCoordinator.register(this);
 	}
 
-	
-	@GET
-	@Produces(MediaType.TEXT_XML)
-	public WsResponse getSubSystems() {
-		WsRequest request = new WsRequest();
+	@WsMethod(
+			isPublic=true,
+			description="Returns a list of subsystems and all methods"
+			)
+	public WsSubsystemResponse getSubSystems(){
+		WsSubsystemResponse response = getWsSubsystemResponse();
 		
-		request.setSubSystem(wsCoordinator.getSubSystemName());
-		request.setMethod("getSubSystems");
-		WsResponse response = wsCoordinator.runRequest(request);
+		response.setSubsystemList(wsCoordinator.getSubSystemList());
+		response.setSuccess(true);
+		return response;
+	}
+	
+	@WsMethod(
+			isPublic=true,
+			description="Echo the object back with the default fields filled",
+			wsParams = { 
+				@WsParam(name="object", type=Object.class)
+			})
+	public WsResponse echo(Object echoObject){
+		WsResponse response = getWsResponse();
+		response.setResponse(echoObject);
+		response.setSuccess(true);
 		
 		return response;
+	}
+	
+	@WsMethod(
+			isPublic=true,
+			description="Call to force the resource subsystem to recache it's list"
+			)
+	public WsSubsystemResponse forceResourceRecache(){
+		Event ev = new Event();
+		ev.setEventType(EventType.RESOURCE_FORCECACHE);
+		ev.setName("ForceResourceRecacheEvent");
+		eventForwarder.forwardEvent(ev);
+		
+		WsSubsystemResponse response = getWsSubsystemResponse();
+		response.setSuccess(true);
+		return response;
+	}
+	
+	@WsMethod(
+			isPublic=true,
+			description="Call to force the device subsystem to recache it's list - This maybe unsafe"
+			)
+	public WsSubsystemResponse forceDeviceRecache(){
+		WsSubsystemResponse response = getWsSubsystemResponse();
+		response.setSuccess(true);
+		return response;
+	}
+
+	@Override
+	public String getSubSystemName() {
+		return subSystemName;
+	}
+
+	public void setWsCoordinator(WsCoordinator wsCoordinator) {
+		this.wsCoordinator = wsCoordinator;
+	}
+
+	public void setEventForwarder(EventForwarder eventForwarder) {
+		this.eventForwarder = eventForwarder;
 	}
 
 }
