@@ -3,17 +3,19 @@ package com.remotr.subsystem.tcpws;
 import java.util.concurrent.BlockingQueue;
 
 import com.remotr.subsystem.device.domain.Device;
+import com.remotr.subsystem.ws.WsEndpointProvider;
 import com.remotr.subsystem.ws.WsSender;
 
 /**
- * Interface for classes implementing TCP Ws coordination. If the implementing class only wants to implement sending, then implement {@link WsSender}
+ * Interface for classes implementing TCP Ws coordination. 
+ * If the implementing class only wants to implement sending, then implement {@link WsSender}
  * @author mattm
  *
  */
-public interface TcpWsCoordinator extends WsSender{
+public interface TcpWsManager extends WsEndpointProvider{
 	
 	/**
-	 * Register a server with the {@link TcpWsCoordinator} for a specific device
+	 * Register a server with the {@link TcpWsManager} for a specific device
 	 * If the registration is successful, then a queue is returned for that server to use.
 	 * @param server
 	 * @param device

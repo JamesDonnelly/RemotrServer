@@ -23,7 +23,7 @@ import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.event.EventForwarder;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
 
-public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator {
+public class TcpWsManagerDefault extends Thread	implements TcpWsManager {
 	
 	private Logger log;
     private Marshaller marshaller = null;
@@ -39,9 +39,9 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 	private int maxConnections = 10;
 	protected static final int SOCKET_TIMEOUT_MILIS = 60000;
 	
-	public TcpWsCoordinatorDefault(boolean tcpWsEnabled, int portNumber){
+	public TcpWsManagerDefault(boolean tcpWsEnabled, int portNumber){
 		log = Logger.getLogger(this.getClass());
-		log.info("Initializing Tcp Ws Coordinator");
+		log.info("Initializing Tcp Ws Manager");
 		
 		this.portNumber = portNumber;
 		
@@ -137,7 +137,7 @@ public class TcpWsCoordinatorDefault extends Thread	implements TcpWsCoordinator 
 	public void unregister(TcpWsServer server) {
 		synchronized (serverDevice) {
 			if(serverDevice.containsKey(server)){
-				log.debug("Unregistering server ["+server.getName()+"] from TcpWsCoordinator");
+				log.debug("Unregistering server ["+server.getName()+"] from TcpWsManager");
 				serverDevice.remove(server);
 				server.connectionsCount--;
 			}

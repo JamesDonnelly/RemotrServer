@@ -32,7 +32,7 @@ public class TcpWsServer extends Thread {
 	
 	private Logger log;
 	private Boolean running;
-	private TcpWsCoordinator tcpWsCoordinator;
+	private TcpWsManager tcpWsManager;
 	private DeviceCoordinator deviceCoordinator;
 	private EventForwarder eventForwarder;
 	private Socket clientSocket;
@@ -41,9 +41,9 @@ public class TcpWsServer extends Thread {
 	private BlockingQueue<String> queue;
 	private Device device;
 	
-	public TcpWsServer(TcpWsCoordinator tcpWsCoordinator, Socket clientSocket, DeviceCoordinator deviceCoordinator, EventForwarder eventForwarder){
+	public TcpWsServer(TcpWsManager tcpWsManager, Socket clientSocket, DeviceCoordinator deviceCoordinator, EventForwarder eventForwarder){
 		log = Logger.getLogger(getClass());
-		this.tcpWsCoordinator = tcpWsCoordinator;
+		this.tcpWsManager = tcpWsManager;
 		this.clientSocket = clientSocket;
 		this.deviceCoordinator = deviceCoordinator;
 		this.eventForwarder = eventForwarder;
@@ -65,7 +65,7 @@ public class TcpWsServer extends Thread {
 	protected void shutdownAndCleanUp(){
 		try{
 			log.info("Ending [" + this.getName() + "]");
-			unregisterFromCoordinator();
+			unregisterFromManager();
 			dataOutput.close();
 			dataInput.close();
 			clientSocket.close();
@@ -87,8 +87,8 @@ public class TcpWsServer extends Thread {
 		heartbeatService.setName("TcpWsHeartbeatService-"+device.getName());
 	}
 	
-	private void unregisterFromCoordinator(){
-		tcpWsCoordinator.unregister(this);
+	private void unregisterFromManager(){
+		tcpWsManager.unregister(this);
 	}
 	
 	private boolean checkDevice(){
@@ -141,10 +141,10 @@ public class TcpWsServer extends Thread {
 								deviceCoordinator.register(device);
 							}
 							
-							queue = tcpWsCoordinator.register(this, device);
+							queue = tcpWsManager.register(this, device);
 							if(queue != null){
 								// Have registered okay and have been assigned a queue :)
-								log.debug("Succsfully registered with coordinator. Starting sender service");
+								log.debug("Succsfully registered with manager. Starting sender service");
 								this.setName("TcpWs-"+device.getName());
 								startTcpWsSenderService();
 								startTcpWsHeartbeatService();
@@ -201,7 +201,7 @@ public class TcpWsServer extends Thread {
 				log.debug("Saying hello to client");
 				
 				// Say hello :)
-				tcpWsCoordinator.sayHello(device);
+				tcpWsManager.sayHello(device);
 				
 				while (running) {
 					synchronized (queue) {
@@ -251,7 +251,7 @@ public class TcpWsServer extends Thread {
 						sleep(HEARTBEAT_WAIT);
 					}
 					
-					tcpWsCoordinator.sendPing(device);
+					tcpWsManager.sendPing(device);
 					
 					// Give the device some time to respond
 					synchronized (this) {
