@@ -12,9 +12,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.remotr.core.hibernate.HibernateUtil;
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.argument.domain.Argument;
 import com.remotr.subsystem.device.argument.jpa.ArgumentJPA;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.command.jpa.CommandJPA;
 import com.remotr.subsystem.device.domain.ConnectionType;
 import com.remotr.subsystem.device.domain.Device;
@@ -36,7 +36,7 @@ import com.remotr.subsystem.session.domain.DeviceSession;
 // TODO: Fix issue where resources and commands are persisted twice due to update (being different)
 // TODO: Set Ids on Command, Resource and Argument domain objects after persisting
 public class DeviceCoordinatorDefault implements DeviceCoordinator {
-	private DeviceList deviceCache;
+	private DeviceList deviceCache; // THIS NEEDS TO BE SYNCONISED!
 	private Logger log;
 	private Session session;
 	private EventForwarder eventForwarder;
@@ -81,6 +81,15 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 		d.setName("SYSTEM");
 		d.setType(DeviceType.SYSTEM);
 		d.setConnectionType(ConnectionType.NONE);
+		
+		Resource r = new Resource();
+		r.setEventType(EventType.BROADCAST);
+		r.setResourceName("SYSTEM-RESOURCE");
+		
+		ArrayList<Resource> rList = new ArrayList<Resource>();
+		rList.add(r);
+		d.setResources(rList);
+		
 		try {
 			register(d);
 		} catch (DeviceException e) {
@@ -89,7 +98,10 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	}
 
 	@Override
-	public DeviceSession register(Device device) throws DeviceException {		
+	public DeviceSession register(Device device) throws DeviceException {	
+		if(!validateDevice(device)){
+			throw new DeviceException("Device registration failed: Device name or type can not be null");
+		}
 		log.info("Incoming request to register device ["+device.getName()+"]");
 		DeviceJPA deviceJPA = new DeviceJPA(device);
 		if(deviceCache.addByDevice(device)){
@@ -136,6 +148,7 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 				device.setSessionKey(deviceSession.getSessionKey());
 				
 				log.info("Device ["+device.getName()+"] registered");
+				triggerRecache();
 		
 				DeviceEvent event = createDeviceEvent("DeviceRegistered", device, EventType.DEVICE_REGISTER);
 				eventForwarder.forwardEvent(event);
@@ -191,6 +204,9 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 	
 	@Override
 	public void updateDevice(Device device) throws DeviceException {
+		if(!validateDevice(device)){
+			throw new DeviceException("Device update failed: Device name or type can not be null");
+		}
 		if(checkDeviceRegistered(device)){
 			log.info("Updating device ["+device.getName()+"]");
 			deviceCache.replace(device);
@@ -346,6 +362,14 @@ public class DeviceCoordinatorDefault implements DeviceCoordinator {
 			log.error("Error restoring persisted devices", e);
 			log.error("Panicing - Removing all devices from device list (List currently holds ["+deviceCache.size()+"] devices)");
 			deviceCache.removeAll();
+		}
+	}
+	
+	private boolean validateDevice(Device device){
+		if(device.getName() == null || device.getType() == null){
+			return false;
+		}else{
+			return true;
 		}
 	}
 	

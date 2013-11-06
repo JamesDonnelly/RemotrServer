@@ -6,9 +6,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.argument.domain.Argument;
 import com.remotr.subsystem.device.argument.jpa.ArgumentJPA;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.command.jpa.CommandJPA;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.domain.DeviceType;
@@ -55,6 +55,7 @@ class DeviceList {
 			for(ResourceJpa rJpa : deviceJpa.getResources()){
 				rList.add(jpaToDomain(rJpa));
 			}
+			device.setResources(rList);
 		}
 		
 		return addByDevice(device);
