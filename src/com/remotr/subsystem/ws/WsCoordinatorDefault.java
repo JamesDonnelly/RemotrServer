@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBElement;
-
 import org.apache.log4j.Logger;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import com.remotr.core.Main;
 import com.remotr.subsystem.device.domain.Device;
+import com.remotr.subsystem.event.EventForwarder;
+import com.remotr.subsystem.event.types.Event;
+import com.remotr.subsystem.event.types.EventType;
 import com.remotr.subsystem.session.SessionCoordinator;
 import com.remotr.subsystem.ws.annotations.WsClass;
 import com.remotr.subsystem.ws.annotations.WsMethod;
@@ -30,10 +31,12 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 // TODO: Service classes should not have to return a WsResponse, but should just return the object to be wrapped -
 // 		 Maybe add the wrapped object type to the response object
 // TODO: Add a message queue to stop this class from becoming overloaded
-public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
+// TODO: Turn the WsXMPP WsTCP and WsSocket coordinator in to managers and have them register with this class
+public class WsCoordinatorDefault implements WsCoordinator {
 	private Logger log;
 	private SessionCoordinator sessionCoordinator;
 	private WsResponseForwarder responseForwarder;
+	private EventForwarder eventForwarder;
 	
 	private Map<String, WsRunner> subsystemMap; // Maps the SubSystem name to it's runner
 	private Map<String, Map<String, Map<String, Class<?> > > > methodMap; // Maps the subsystem name to a map of methods mapping to a map of param names and their class type
@@ -51,16 +54,23 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 		systemHolders = new ArrayList<WsSubsystemHolder>();
 		
 		log.info("Starting WsCoordinator");
-		
-		this.register(this);
 	}
 
 	public void setResponseForwarder(WsResponseForwarder responseForwarder) {
 		this.responseForwarder = responseForwarder;
 	}
 
+	public void setEventForwarder(EventForwarder eventForwarder) {
+		this.eventForwarder = eventForwarder;
+	}
+
 	public void setSessionCoordinator(SessionCoordinator sessionCoordinator) {
 		this.sessionCoordinator = sessionCoordinator;
+	}
+	
+	@Override
+	public ArrayList<WsSubsystemHolder> getSubSystemList() {
+		return systemHolders;
 	}
 
 	@Override
@@ -201,6 +211,8 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	 				response.setErrorMessage("Unknown response when running WsRequest");
 	 			}
 			}catch(Exception e){
+				log.error("Error running request on runner:");
+				log.error(e);
 				response.setException(e);
 			}
 			
@@ -227,8 +239,9 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 			for(WsParamHolder p : request.getMethod().getWsParamList()){
 				if(paramMap.containsKey(p.getName())){
 					Class<?> clazz = paramMap.get(p.getName());
-					JAXBElement<?> element = (JAXBElement<?>) p.getValue();
-					Object o = element.getValue();
+					//JAXBElement<?> element = (JAXBElement<?>) p.getValue();
+					//Object o = element.getValue();
+					Object o = p.getValue();
 					paramObjects.add(clazz.cast(o));
 					classList.add(clazz);
 				}
@@ -258,37 +271,6 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 	    }
 	}
 	
-	@WsMethod(
-			isPublic=true,
-			description="Returns a list of subsystems and all methods"
-			)
-	public WsSubsystemResponse getSubSystems(){
-		WsSubsystemResponse response = getWsSubsystemResponse();
-		
-		response.setSubsystemList(systemHolders);
-		response.setSuccess(true);
-		return response;
-	}
-	
-	@WsMethod(
-			isPublic=true,
-			description="Echo the object back with the default fields filled",
-			wsParams = { 
-				@WsParam(name="echoObject", type=Object.class)
-			})
-	public WsResponse echo(Object echoObject){
-		WsResponse response = getWsResponse();
-		response.setResponse(echoObject);
-		response.setSuccess(true);
-		
-		return response;
-	}
-
-	@Override
-	public String getSubSystemName() {
-		return "WsCoordinator";
-	}
-	
 	private WsMethodHolder getMethodHolder(WsRequest request){
 		for(WsSubsystemHolder sHolder : systemHolders){
 			if(sHolder.getSubsystemName().equals(request.getSubSystem())){
@@ -302,24 +284,14 @@ public class WsCoordinatorDefault implements WsCoordinator, WsRunner{
 		return null;
 	}
 	
-	private WsResponse getWsResponse(){
-		WsResponse response = new WsResponse();
-		response.setSubSystem(getSubSystemName());
+	protected WsResponse getWsResponse(){
+		WsResponse wsResponse = new WsResponse();
+		wsResponse.setSubSystem("Service");
 		
-		response.setVersionName(Main.getVersionName());
-		response.setVersionNum(Main.getVersionNumber());
+		wsResponse.setVersionName(Main.getVersionName());
+		wsResponse.setVersionNum(Main.getVersionNumber());
 		
-		return response;
+		return wsResponse;
 	}
 	
-	private WsSubsystemResponse getWsSubsystemResponse() {
-		WsSubsystemResponse response = new WsSubsystemResponse();
-		response.setSubSystem(getSubSystemName());
-		
-		response.setVersionName(Main.getVersionName());
-		response.setVersionNum(Main.getVersionNumber());
-		
-		return response;
-	}
-
 }
