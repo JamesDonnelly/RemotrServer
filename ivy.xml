@@ -13,9 +13,6 @@
         <dependency org="junit" name="junit" rev="4.11"/>
         <dependency org="org.mockito" name="mockito-all" rev="1.9.5"/>
         
-        <!-- Cargo -->
-        <!-- dependency org="org.codehaus.cargo" name="cargo-core-uberjar" rev="1.4.3"/ -->
-        
         <!-- Job Scheduling -->
         <dependency org="org.quartz-scheduler" name="quartz" rev="2.2.0"/>
         
@@ -37,9 +34,11 @@
         <dependency org="org.springframework" name="spring-context" rev="3.2.4.RELEASE"/>
         <dependency org="org.springframework" name="spring-web" rev="3.2.4.RELEASE" conf="default"/>
         
-        <!-- JAX RS and Jersey -->
+        <!-- JAX RS -->
         <dependency org="javax.ws.rs" name="jsr311-api" rev="1.1.1"/>
-        <dependency org="com.sun.jersey" name="jersey-bundle" rev="1.7"/>
+        
+        <!-- MOXy -->
+        <dependency org="org.eclipse.persistence" name="org.eclipse.persistence.moxy" rev="2.5.1"/>
         
     </dependencies>
 </ivy-module>
