@@ -42,6 +42,8 @@ public class SessionCoordinatorService extends WsBase implements WsRunner {
 			log.debug("Setting DeviceSession as response object");
 			response.setResponse(deviceSession);
 			response.setSuccess(true);
+		}else{
+			response.setErrorMessage("There was an error login in to Remotr");
 		}
 		
 		return response;
