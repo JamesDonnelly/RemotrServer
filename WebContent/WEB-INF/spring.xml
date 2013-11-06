@@ -10,9 +10,13 @@
     <context:annotation-config />
 
 	<!-- WS Subsystem -->
-	<bean id="wsCoordinatorService" class="com.remotr.subsystem.ws.WsCoordinatorService" autowire="default" />
+	<bean id="wsCoordinatorService" class="com.remotr.subsystem.ws.WsCoordinatorService">
+		<property name="wsCoordinator" ref="wsCoordinator" />
+		<property name="eventForwarder" ref="eventCoordinator"/>
+	</bean>
 	<bean id="wsCoordinator" class="com.remotr.subsystem.ws.WsCoordinatorDefault">
 	    <property name="responseForwarder" ref="eventCoordinator"/>
+	    <property name="eventForwarder" ref="eventCoordinator"/>
 	    <property name="sessionCoordinator" ref="sessionCoordinator" />
 	</bean>
 	
@@ -43,7 +47,7 @@
 	</bean>
 
 	<!-- WsTcp Subsystem -->
-	<bean id="tcpCoordinator" class="com.remotr.subsystem.tcpws.TcpWsCoordinatorDefault">
+	<bean id="tcpManager" class="com.remotr.subsystem.tcpws.TcpWsManagerDefault">
 		<constructor-arg name="tcpWsEnabled" value="true" />
 		<constructor-arg name="portNumber" value="3030" />
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
@@ -66,7 +70,7 @@
 	<bean id="eventCoordinator" class="com.remotr.subsystem.event.EventCoordinatorDefault">
 		<property name="deviceCoordinator" ref="deviceCoordinator" />
 		<property name="resourceCoordinator" ref="resourceCoordinator" />
-		<property name="tcpWsSender" ref="tcpCoordinator" />
+		<property name="tcpWsSender" ref="tcpManager" />
 		<property name="xmppWsSender" ref="xmppCoordinator" />
 		<property name="wsSocketSender" ref="wsSocketCoordinator" />
 	</bean>
