@@ -47,6 +47,8 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 	@Autowired
 	private WsSockectCoordinator socketCoordinator;
 	
+	public static final int HEARTBEAT_WAIT = 30000;
+	
 	private Logger log;
 	private Marshaller marshaller;
 	private Unmarshaller unmarshaller;
@@ -65,14 +67,14 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
     	log.warn("Connection closed: ["+statusCode+"] - ["+reason+"]");
         this.session = null;
         this.closeLatch.countDown();
-        stopWsSocketSenderSerice();
+        stopWsSocketSerices();
     }
  
     @OnWebSocketConnect
     public void onConnect(Session session) {
     	log.info("Starting new wsSocketSession");
         this.session = session;
-        this.session.setIdleTimeout(180000);
+        this.session.setIdleTimeout(60000);
         sendMessage(makeConnectionAck());
     }
  
@@ -104,6 +106,7 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 					if(queue != null){
 						log.debug("Succsfully registered with coordinator. Starting sender service");
 						startWsSocketSenderService(d);
+						startWsSocketHeartbeatService(d);
 					}
 				} catch (DeviceException e) {
 					log.error("Error getting device via session", e);
@@ -177,15 +180,22 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 			throw new WsException("Error unmarshalling WsRequest string");
 		}
 	}
+	
+	private void startWsSocketHeartbeatService(Device device){
+		WsSocketHeartbeatService heartbeatService = new WsSocketHeartbeatService();
+		running = true;
+		heartbeatService.start();
+		heartbeatService.setName("WsSocketHeartbeatService-"+device.getName());
+	}
 
 	private void startWsSocketSenderService(Device device){
 		WsSocketSenderService senderService =  new WsSocketSenderService();
 		running = true;
 		senderService.start();
-		senderService.setName("TcpWsSenderService-"+device.getName());
+		senderService.setName("WsSocketSenderService-"+device.getName());
 	}
 	
-	private void stopWsSocketSenderSerice(){
+	private void stopWsSocketSerices(){
 		socketCoordinator.unregister(this);
 		running = false;
 	}
@@ -207,17 +217,45 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 								log.error("Error taking message from queue", e);
 							}
 						}
-						try {
-							synchronized (this) {
-								wait(1000);
-							}
-						} catch (InterruptedException e) {
-							log.error("Sleep interrupted", e);
+					}
+					try {
+						synchronized (this) {
+							wait(1000);
 						}
+					} catch (InterruptedException e) {
+						log.error("Sleep interrupted", e);
 					}
 				}	
 			}catch(Exception e){
 				log.error(e.getMessage(), e);
+				onClose(0, e.getMessage());
+			}
+		}
+	}
+	
+	class WsSocketHeartbeatService extends Thread {
+		public void run(){
+			try {
+				log.info("Initializing [" + this.getName() + "]");
+				while(running){
+					// Send them every few mins
+					synchronized (this) {
+						sleep(HEARTBEAT_WAIT);
+					}
+					
+					final WsResponse pingResponse = new WsResponse();
+					pingResponse.setSubSystem("WsSocket");
+					pingResponse.setResponse("Ping");
+					pingResponse.setSuccess(true);
+					
+					// We don't really care about the response to from the remote device - the sockets in jetty will take care of the timeout
+					synchronized (queue) {
+						log.debug("Adding ping message to queue");
+						queue.add(pingResponse);
+					}
+				}
+			}catch(Exception e){
+				onClose(0, e.getMessage());
 			}
 		}
 	}

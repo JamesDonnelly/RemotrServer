@@ -118,7 +118,7 @@ public class WsSocketCoordinatorDefault extends WebSocketServlet implements WsSo
 
 	@Override
 	public void configure(WebSocketServletFactory factory) {
-		 factory.getPolicy().setIdleTimeout(10000);
+		 factory.getPolicy().setIdleTimeout(60000);
 	     factory.register(WsSocketServer.class);
 	}
 
