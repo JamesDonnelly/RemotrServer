@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +24,15 @@ import com.remotr.subsystem.ws.response.domain.WsSubsystemHolder;
 import com.remotr.subsystem.ws.response.domain.WsSubsystemResponse;
 
 public class WsCoordinatorDefaultTest extends WsTestBase {
+	private String subsystemName;
 
 	@Before
 	public void setUp() throws Exception {
+		WsCoordinatorService coordinatorService = new WsCoordinatorService();
+		assertNotNull(coordinatorService);
+		
+		subsystemName = coordinatorService.getSubSystemName();
+		assertNotNull(subsystemName);
 	}
 
 	@After
@@ -47,7 +55,7 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 		
 		wsCoordinator.setResponseForwarder(forwarder);
 
-		WsRequest request = buildRequest(wsCoordinator.getSubSystemName(), WSGET_SUBSYSTEMS, "TEST_REFF");
+		WsRequest request = buildRequest(subsystemName, WSGET_SUBSYSTEMS, "TEST_REFF");
 		assertNotNull(request);
 		
 		// This shouldn't cause an NPE
@@ -68,22 +76,20 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 
 	@Test
 	public void testRegister() {
-		WsCoordinatorDefault wsCoordinator = new WsCoordinatorDefault();	
+		WsCoordinator wsCoordinator = getWsCoordinator();
 		assertNotNull(wsCoordinator);
 		
 		TestRunnerClass runnerClass = new TestRunnerClass(wsCoordinator);
 		assertNotNull(runnerClass);
 		runnerClass.register();
 		
-		WsRequest request = buildRequest(wsCoordinator.getSubSystemName(), WSGET_SUBSYSTEMS, "TEST_REFF");
-		assertNotNull(request);
-		WsSubsystemResponse response = (WsSubsystemResponse) wsCoordinator.runRequest(request);
-		assertNotNull(response);
-		assertEquals(2, response.getSubsystemList().size());
+		ArrayList<WsSubsystemHolder> subsystems = wsCoordinator.getSubSystemList();
+		assertNotNull(subsystems);
+		assertEquals(1, subsystems.size());
 		
 		// See if the subsystem we just registered has made it in to the get response
 		boolean found = false;
-		for(WsSubsystemHolder sHolder : response.getSubsystemList()){
+		for(WsSubsystemHolder sHolder : subsystems){
 			if(sHolder.getSubsystemName().equals("TestRunnerClass")){
 				found = true;
 			}
@@ -91,7 +97,7 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 		assertTrue(found);
 		
 		found = false;
-		for(WsSubsystemHolder sHolder : response.getSubsystemList()){
+		for(WsSubsystemHolder sHolder : subsystems){
 			if(sHolder.getSubsystemName().equals("TestRunnerClass")){
 				assertEquals("This is a test class", sHolder.getSubsystemDescription());
 				for(WsMethodHolder mHolder : sHolder.getWsMethodList()){
@@ -127,28 +133,23 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 
 	@Test
 	public void testRunRequestWsRequest() {
-		// Starting a new WsCoordinator causes it to register with itself
 		WsCoordinator wsCoordinator = new WsCoordinatorDefault();
+		WsCoordinatorService coordinatorService = new WsCoordinatorService();
+		
+		coordinatorService.setWsCoordinator(wsCoordinator);
+		coordinatorService.init();
 		
 		assertNotNull(wsCoordinator);
-		assertNotNull(wsCoordinator.getSubSystemName());
+		assertNotNull(subsystemName);
 		
 		String reff = "TEST_REFF";
-		WsRequest request = buildRequest(wsCoordinator.getSubSystemName(), WSGET_SUBSYSTEMS, reff);
+		WsRequest request = buildRequest(subsystemName, WSGET_SUBSYSTEMS, reff);
 		assertNotNull(request);
 		
 		WsSubsystemResponse response = (WsSubsystemResponse) wsCoordinator.runRequest(request);
 		testResponse(request, response, true, true);
 		
 		assertEquals(1, response.getSubsystemList().size());
-		
-		WsSubsystemHolder sHolder = response.getSubsystemList().get(0);
-		assertNotNull(sHolder);
-		assertEquals(wsCoordinator.getSubSystemName(), sHolder.getSubsystemName());
-		
-		WsMethodHolder mHolder = sHolder.getWsMethodList().get(0);
-		assertNotNull(mHolder);
-		assertEquals(WSGET_SUBSYSTEMS, mHolder.getMethodName());
 	}
 
 	@Test
@@ -161,21 +162,12 @@ public class WsCoordinatorDefaultTest extends WsTestBase {
 		
 		wsCoordinator.setResponseForwarder(forwarder);
 
-		WsRequest request = buildRequest(wsCoordinator.getSubSystemName(), WSGET_SUBSYSTEMS, "TEST_REFF");
+		WsRequest request = buildRequest(subsystemName, WSGET_SUBSYSTEMS, "TEST_REFF");
 		assertNotNull(request);
 		
 		// This shouldn't cause an NPE
 		wsCoordinator.runRequest(request, getTestDevice());
 		// TODO: Make this test better
-	}
-
-	@Test
-	public void testGetSubSystemName() {
-	WsCoordinator wsCoordinator = new WsCoordinatorDefault();
-		
-		assertNotNull(wsCoordinator);
-		assertNotNull(wsCoordinator.getSubSystemName());
-		assertEquals("WsCoordinator", wsCoordinator.getSubSystemName());
 	}
 	
 	@WsClass(description="This is a test class")

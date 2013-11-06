@@ -25,8 +25,8 @@ public abstract class WsTestBase {
 	
 	public WsCoordinator getWsCoordinator(){
 		WsCoordinator wsCoordinator = new WsCoordinatorDefault();
+		
 		assertNotNull(wsCoordinator);
-		assertNotNull(wsCoordinator.getSubSystemName());
 		
 		return wsCoordinator;
 	}
