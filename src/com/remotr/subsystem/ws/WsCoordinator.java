@@ -1,9 +1,12 @@
 package com.remotr.subsystem.ws;
 
+import java.util.ArrayList;
+
 import com.remotr.subsystem.device.domain.ConnectionType;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
+import com.remotr.subsystem.ws.response.domain.WsSubsystemHolder;
 
 public interface WsCoordinator {
 	
@@ -44,10 +47,10 @@ public interface WsCoordinator {
 	 */
 	public WsResponse runRequest(WsRequest wsRequest);
 	
-	
 	/**
-	 * Returns the WsCoordinators internal subsystem name
+	 * Returns a list of the subsystems and their methods
+	 * @return
 	 */
-	public String getSubSystemName();
+	public ArrayList<WsSubsystemHolder> getSubSystemList();
 
 }
