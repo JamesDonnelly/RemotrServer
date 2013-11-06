@@ -6,8 +6,8 @@ import org.apache.log4j.Logger;
 import org.quartz.JobDataMap;
 
 import com.remotr.core.Main;
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.DeviceCoordinator;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.job.domain.JobStatus;
 import com.remotr.subsystem.ws.WsBase;

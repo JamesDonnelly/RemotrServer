@@ -23,9 +23,9 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.DeviceCoordinator;
 import com.remotr.subsystem.device.DeviceException;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.device.resource.ResourceCoordinator;
 import com.remotr.subsystem.event.EventCoordinator;

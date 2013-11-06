@@ -70,15 +70,16 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 			isAsync=true,
 			description="Register a device for a certian event type",
 			wsParams = { 
-					@WsParam(name="eventType", type=Event.class)
+					@WsParam(name="event", type=Event.class)
 			})
-	public WsResponse registerForEvents(EventType eventType) {
+	public WsResponse registerForEvents(Event event) {
 		log.info("Incoming request to register for events");
 		WsResponse wsResponse = getWsResponse();
 		try{
 			Device device = deviceCoordinator.getDeviceBySessionKey(sessionKey);
 			device = deviceCoordinator.getDevice(device);
 			if(device != null){
+				EventType eventType = event.getEventType();
 				wsResponse.setSuccess(eventCoordinator.registerForEvents(device, eventType));
 			}
 		}catch(DeviceException de){
@@ -108,6 +109,32 @@ public class EventCoordinatorService extends WsBase implements WsRunner {
 			wsResponse.setException(de);
 		}
 		return wsResponse;
+	}
+	
+	@WsMethod(
+			isPublic=true,
+			description="Send a ping to all devices registered for broadcast events"
+			)
+	public WsResponse sendPingEvent(){
+		log.info("Incoming request to send ping event");
+		WsResponse response = getWsResponse();
+		
+		Event ev = new Event();
+		ev.setEventType(EventType.BROADCAST);
+		ev.setName("Ping");
+		
+		try {
+			Device sysDevice = deviceCoordinator.getSystemDevice();
+			ev.setResource(sysDevice.getResources().get(0));
+			
+			eventCoordinator.forwardEvent(ev);
+			
+			response.setSuccess(true);
+		} catch (DeviceException e) {
+			log.error("Error getting system device from coordinator");
+		}
+
+		return response;
 	}
 
 	@Override

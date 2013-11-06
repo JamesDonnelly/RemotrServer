@@ -7,7 +7,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.PersistJobDataAfterExecution;
 
-import com.remotr.device.command.domain.Command;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.job.domain.JobStatus;
 

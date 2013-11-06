@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.DeviceCoordinatorDefault;
 import com.remotr.subsystem.device.DeviceException;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.job.JobCoordinator;
 

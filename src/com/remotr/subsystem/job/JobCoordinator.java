@@ -2,7 +2,7 @@ package com.remotr.subsystem.job;
 
 import org.quartz.JobDataMap;
 
-import com.remotr.device.command.domain.Command;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 
 public interface JobCoordinator {

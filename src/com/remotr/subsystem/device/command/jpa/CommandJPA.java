@@ -16,9 +16,9 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.argument.domain.Argument;
 import com.remotr.subsystem.device.argument.jpa.ArgumentJPA;
+import com.remotr.subsystem.device.command.domain.Command;
 
 @Entity
 @Table(name="command")

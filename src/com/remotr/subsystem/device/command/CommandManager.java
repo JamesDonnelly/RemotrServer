@@ -2,9 +2,9 @@ package com.remotr.subsystem.device.command;
 
 import java.util.ArrayList;
 
-import com.remotr.device.command.domain.Command;
 import com.remotr.subsystem.device.DeviceException;
 import com.remotr.subsystem.device.argument.domain.Argument;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.domain.Device;
 
 /**

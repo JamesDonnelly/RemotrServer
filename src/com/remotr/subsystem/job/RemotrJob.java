@@ -2,7 +2,7 @@ package com.remotr.subsystem.job;
 
 import org.quartz.JobKey;
 
-import com.remotr.device.command.domain.Command;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.job.domain.JobStatus;
 
 /**

@@ -18,7 +18,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
-import com.remotr.device.command.domain.Command;
+import com.remotr.subsystem.device.command.domain.Command;
 import com.remotr.subsystem.device.command.jpa.CommandJPA;
 import com.remotr.subsystem.device.domain.ConnectionType;
 import com.remotr.subsystem.device.domain.Device;
