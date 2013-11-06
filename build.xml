@@ -170,7 +170,9 @@
 			</lib>
 			<zipfileset dir="${build.dir}/src" includes="hibernate.cfg.xml" prefix="WEB-INF/classes" />
 			<zipfileset dir="${build.dir}/src" includes="hibernate.properties" prefix="WEB-INF/classes" />
+			<zipfileset dir="${build.dir}/src" includes="jaxb.properties" prefix="WEB-INF/classes/com/remotr/core/jaxb" />
 			<zipfileset dir="${webcontent.dir}/WEB-INF" includes="spring.xml" prefix="WEB-INF/" />
+			<zipfileset dir="${webcontent.dir}" includes="index.html" prefix="/" />
 			<classes dir="${bin.dir}" />
 		</war>
 		<echo message="WAR file created." />
