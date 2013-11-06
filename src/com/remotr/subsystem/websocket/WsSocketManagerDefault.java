@@ -17,7 +17,7 @@ import com.remotr.subsystem.ws.response.domain.WsResponse;
 //		 The manager class then talks to the coordinator. This allows splating this out over multiple servers.
 //		 They will need to chatter via Event objects... (Good thing I built that bit really...)
 
-public class WsSocketCoordinatorDefault extends WebSocketServlet implements WsSockectCoordinator {
+public class WsSocketManagerDefault extends WebSocketServlet implements WsSockectManager {
 
 	private static final long serialVersionUID = 1L;
 	private Logger log;
@@ -25,9 +25,9 @@ public class WsSocketCoordinatorDefault extends WebSocketServlet implements WsSo
 	protected Map<WsSocketServer, Device> serverDevice;
 	protected Map<WsSocketServer, BlockingQueue<WsResponse>> serverQueue;
 	
-	public WsSocketCoordinatorDefault(){
+	public WsSocketManagerDefault(){
 		log = Logger.getLogger(this.getClass());
-		log.info("Initializing Ws Socket Coordinator");
+		log.info("Initializing Ws Socket Manager");
 		
 		serverDevice = new HashMap<WsSocketServer, Device>();
 		serverQueue = new HashMap<WsSocketServer, BlockingQueue<WsResponse>>(20);
@@ -54,7 +54,7 @@ public class WsSocketCoordinatorDefault extends WebSocketServlet implements WsSo
 	public void unregister(WsSocketServer wsSocketServer) {
 		synchronized (serverDevice) {
 			if(serverDevice.containsKey(wsSocketServer)){
-				log.debug("Unregistering server ["+wsSocketServer.toString()+"] from WsSocketCoordinator");
+				log.debug("Unregistering server ["+wsSocketServer.toString()+"] from WsSocketManager");
 				serverDevice.remove(wsSocketServer);
 			}
 		}

@@ -8,12 +8,12 @@ import com.remotr.subsystem.device.DeviceCoordinator;
 
 public class XmppDeviceListener implements ChatManagerListener {
 	private Logger log;
-	private XmppCoordinator xmppCoordinator;
+	private XmppManager xmppManager;
 	private DeviceCoordinator deviceCoordinator;
 	
-	public XmppDeviceListener(XmppCoordinator xmppCoordinator, DeviceCoordinator deviceCoordinator){
+	public XmppDeviceListener(XmppManager xmppCoordinator, DeviceCoordinator deviceCoordinator){
 		log = Logger.getLogger(this.getClass());
-		this.xmppCoordinator = xmppCoordinator;
+		this.xmppManager = xmppCoordinator;
 		this.deviceCoordinator = deviceCoordinator;
 	}
 
@@ -21,7 +21,7 @@ public class XmppDeviceListener implements ChatManagerListener {
 	public void chatCreated(Chat chat, boolean createdLocally) {
 		if(!createdLocally){
 			log.debug("Creating new MessageManager for ["+chat.getParticipant()+"]");
-			chat.addMessageListener(new XmppMessageServer(xmppCoordinator, deviceCoordinator));
+			chat.addMessageListener(new XmppMessageServer(xmppManager, deviceCoordinator));
 		}
 	}
 

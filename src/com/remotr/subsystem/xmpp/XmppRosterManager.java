@@ -8,11 +8,11 @@ import org.jivesoftware.smack.packet.Presence;
 
 public class XmppRosterManager implements RosterListener {
 	private Logger log;
-	private XmppCoordinator xmppCoordinator;
+	private XmppManager xmppManager;
 	
-	public XmppRosterManager(XmppCoordinator xmppCoordinator){
+	public XmppRosterManager(XmppManager xmppCoordinator){
 		log = Logger.getLogger(this.getClass());
-		this.xmppCoordinator = xmppCoordinator;
+		this.xmppManager = xmppCoordinator;
 	}
 
 	@Override

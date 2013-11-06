@@ -45,7 +45,7 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 	private DeviceCoordinator deviceCoordinator;
 	
 	@Autowired
-	private WsSockectCoordinator socketCoordinator;
+	private WsSockectManager socketManager;
 	
 	public static final int HEARTBEAT_WAIT = 30000;
 	
@@ -102,7 +102,7 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 					d.setConnectionType(ConnectionType.WSOCKET);
 					deviceCoordinator.updateDevice(d);
 					
-					queue = socketCoordinator.register(this, d);
+					queue = socketManager.register(this, d);
 					if(queue != null){
 						log.debug("Succsfully registered with coordinator. Starting sender service");
 						startWsSocketSenderService(d);
@@ -196,7 +196,7 @@ public class WsSocketServer extends SpringBeanAutowiringSupport implements WsRes
 	}
 	
 	private void stopWsSocketSerices(){
-		socketCoordinator.unregister(this);
+		socketManager.unregister(this);
 		running = false;
 	}
 	

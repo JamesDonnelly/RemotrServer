@@ -26,7 +26,7 @@ import com.remotr.subsystem.ws.response.domain.WsResponse;
 public class XmppMessageServer implements MessageListener, RosterListener {
 
 	private Logger log;
-	private XmppCoordinator xmppCoordinator;
+	private XmppManager xmppManager;
 	public static int connectionsCount = 0;
 	private boolean running;
 	protected Device device;
@@ -34,9 +34,9 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 	private DeviceCoordinator deviceCoordinator;
 	private Chat chat;
 	
-	public XmppMessageServer(XmppCoordinator xmppCoordinator, DeviceCoordinator deviceCoordinator){
+	public XmppMessageServer(XmppManager xmppCoordinator, DeviceCoordinator deviceCoordinator){
 		log = Logger.getLogger(this.getClass());
-		this.xmppCoordinator = xmppCoordinator;
+		this.xmppManager = xmppCoordinator;
 		this.deviceCoordinator = deviceCoordinator;
 		
 		log.info("Starting new XmppMessageManager");
@@ -72,14 +72,14 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 						deviceCoordinator.register(device);
 					}
 				
-					queue = xmppCoordinator.register(this, device);
+					queue = xmppManager.register(this, device);
 					if(queue != null){
 						// Have registered okay and have been assigned a queue :)
-						log.debug("Succsfully registered with coordinator. Starting sender service");
+						log.debug("Succsfully registered with manager. Starting sender service");
 						running = true;
 						XmppSenderService senderService = new XmppSenderService();
 						senderService.start();
-						xmppCoordinator.sayHello(device);
+						xmppManager.sayHello(device);
 					}
 					
 				}else{
@@ -90,19 +90,19 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 			if(obj instanceof WsRequest){
 				WsRequest request = (WsRequest) obj;
 				log.info("["+device.getName()+"] request to call ["+request.getMethod()+"] on ["+request.getSubSystem()+"]");
-				xmppCoordinator.handleRequest(device, request);
+				xmppManager.handleRequest(device, request);
 			}
 
 			
 			if(obj instanceof Event){
 				Event event = (Event) obj;
-				xmppCoordinator.handleEvent(event);
+				xmppManager.handleEvent(event);
 				
 				WsResponse response = new WsResponse();
 				response.setReference(event.getRefference());
 				response.setSubSystem("XmppCoordinator");
 				response.setSuccess(true);
-				xmppCoordinator.sendResponse(device, response);
+				xmppManager.sendResponse(device, response);
 			}
 			
 		} catch (JAXBException e) {
@@ -174,12 +174,12 @@ public class XmppMessageServer implements MessageListener, RosterListener {
 		WsResponse response = new WsResponse();
 		response.setSubSystem("XmppCoordinator");
 		response.setErrorMessage(msg);
-		xmppCoordinator.sendResponse(device, response);				
+		xmppManager.sendResponse(device, response);				
 	}
 	
 	private void shutdownAndCleanUp(){
 		log.info("Ending ["+chat.getParticipant()+"]");
-		xmppCoordinator.unregister(this);
+		xmppManager.unregister(this);
 		running = false;
 	}
 	

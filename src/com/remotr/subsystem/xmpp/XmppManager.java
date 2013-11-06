@@ -4,7 +4,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.remotr.subsystem.device.domain.Device;
 import com.remotr.subsystem.event.types.Event;
-import com.remotr.subsystem.ws.WsSender;
+import com.remotr.subsystem.ws.WsEndpointProvider;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 
 /**
@@ -13,10 +13,10 @@ import com.remotr.subsystem.ws.request.domain.WsRequest;
  * @author mattm
  *
  */
-public interface XmppCoordinator extends WsSender {
+public interface XmppManager extends WsEndpointProvider {
 	
 	/**
-	 * Register a {@link XmppMessageServer} with the {@link XmppCoordinator} for a specific device
+	 * Register a {@link XmppMessageServer} with the {@link XmppManager} for a specific device
 	 * If the registration is successful, then a queue is returned for that server to use.
 	 * @param server
 	 * @param device

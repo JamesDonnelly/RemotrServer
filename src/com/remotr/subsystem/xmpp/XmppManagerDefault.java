@@ -37,14 +37,14 @@ import com.remotr.subsystem.ws.WsCoordinator;
 import com.remotr.subsystem.ws.request.domain.WsRequest;
 import com.remotr.subsystem.ws.response.domain.WsResponse;
 /**
- * The default implementation of the {@link XmppCoordinator}. 
+ * The default implementation of the {@link XmppManager}. 
  * This is a little different from the TcpWs. XMPP supports the WsRequest class that can be used to call the SOAP service, it also supports 'offline' messages. 
  * Events sent to a device when it doesn't have a sender thread running is still sent, but it's up to the XMPP server to cache the message
  * @author mattm
  *
  */
 // TODO: Fix issue where message thread is still matained if the given device does not match Xmpp user name
-public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
+public class XmppManagerDefault implements XmppManager, EventReceiver {
 	private Logger log;
 	private Marshaller marshaller = null;
 	
@@ -60,7 +60,7 @@ public class XmppCoordinatorDefault implements XmppCoordinator, EventReceiver {
 	protected Map<XmppMessageServer, Device> messageManagerDevice;
 	protected Map<XmppMessageServer, BlockingQueue<String>> messageManagerQueue;
 
-	public XmppCoordinatorDefault(String xmppServerAddress, DeviceCoordinator deviceCoordinator){
+	public XmppManagerDefault(String xmppServerAddress, DeviceCoordinator deviceCoordinator){
 		log = Logger.getLogger(this.getClass());
 		log.info("Starting XMPP Connection");
 		this.deviceCoordinator = deviceCoordinator; 
