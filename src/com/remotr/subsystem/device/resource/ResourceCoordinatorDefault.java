@@ -106,7 +106,8 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 	public void onEvent(Event event) {
 		if(event.getEventType().equals(EventType.DEVICE_REGISTER) || 
 				event.getEventType().equals(EventType.DEVICE_UPDATE) || 
-				event.getEventType().equals(EventType.DEVICE_UNREGISTER)){
+				event.getEventType().equals(EventType.DEVICE_UNREGISTER) ||
+				event.getEventType().equals(EventType.RESOURCE_FORCECACHE)) {
 			triggerRecache();
 		}
 	}
@@ -121,6 +122,7 @@ public class ResourceCoordinatorDefault implements ResourceCoordinator, EventRec
 					ArrayList<Resource> resourceList = d.getResources();
 					if(resourceList != null){
 						for(Resource r : resourceList){
+							log.debug("Caching resource ["+r.getResourceName()+"]");
 							resourceMap.put(r.getId(), r);
 						}
 					}
